@@ -21,7 +21,7 @@ export function CardStreak({ days = 14 }: { days?: number }) {
         <div style={{ fontFamily: 'var(--sans)', fontSize: 32, color: 'rgba(254,248,245,0.5)', marginTop: 20 }}>a ler no Zuri</div>
       </div>
 
-      <div style={{ position: 'absolute', bottom: 90, fontFamily: 'var(--sans)', fontSize: 30, color: 'rgba(254,248,245,0.4)', letterSpacing: '0.08em' }}>zuri.app</div>
+      <div style={{ position: 'absolute', bottom: 90, fontFamily: 'var(--sans)', fontSize: 30, color: 'rgba(254,248,245,0.4)', letterSpacing: '0.08em' }}>zuribook.page</div>
     </div>
   )
 }

@@ -15,6 +15,8 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
   const books = useCatalog((s) => s.books)
   const progress = useLibrary((s) => s.progress)
   const name = user?.name?.split(' ')[0] ?? 'Leitor'
+  const h = new Date().getHours()
+  const greeting = h < 12 ? 'Bom dia' : h < 19 ? 'Boa tarde' : 'Boa noite'
 
   const month = new Date().toLocaleString('pt-PT', { month: 'long' })
   const monthLabel = month.charAt(0).toUpperCase() + month.slice(1)
@@ -29,7 +31,7 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
       {/* Header */}
       <div style={{ padding: '60px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 28, color: 'var(--text)', margin: 0, lineHeight: 1.15 }}>Boa tarde,<br/>{name}</h1>
+          <h1 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 28, color: 'var(--text)', margin: 0, lineHeight: 1.15 }}>{greeting},<br/>{name}</h1>
           <p style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--text3)', margin: '6px 0 0' }}>O que vais ler hoje?</p>
         </div>
         <div style={{ position: 'relative', flexShrink: 0, paddingTop: 6 }}>

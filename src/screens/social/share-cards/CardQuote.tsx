@@ -17,7 +17,7 @@ export function CardQuote({ quote = 'A terra é sempre a terra de alguém.', boo
         </div>
       </div>
 
-      <div style={{ position: 'absolute', bottom: 90, fontFamily: 'var(--sans)', fontSize: 30, color: 'rgba(40,35,28,0.3)', letterSpacing: '0.08em' }}>zuri.app</div>
+      <div style={{ position: 'absolute', bottom: 90, fontFamily: 'var(--sans)', fontSize: 30, color: 'rgba(40,35,28,0.3)', letterSpacing: '0.08em' }}>zuribook.page</div>
     </div>
   )
 }

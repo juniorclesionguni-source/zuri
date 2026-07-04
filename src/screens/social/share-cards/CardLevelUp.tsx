@@ -17,7 +17,7 @@ export function CardLevelUp({ level = 3 }: { level?: number }) {
         <div style={{ fontFamily: 'var(--sans)', fontSize: 36, color: 'rgba(40,35,28,0.5)', marginTop: 20 }}>no Zuri</div>
       </div>
 
-      <div style={{ position: 'absolute', bottom: 90, fontFamily: 'var(--sans)', fontSize: 30, color: 'rgba(40,35,28,0.3)', letterSpacing: '0.08em' }}>zuri.app</div>
+      <div style={{ position: 'absolute', bottom: 90, fontFamily: 'var(--sans)', fontSize: 30, color: 'rgba(40,35,28,0.3)', letterSpacing: '0.08em' }}>zuribook.page</div>
     </div>
   )
 }

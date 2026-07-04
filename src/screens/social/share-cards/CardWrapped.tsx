@@ -35,7 +35,7 @@ export function CardWrapped({ month = 'SETEMBRO', stats = { books: 23, hours: 16
         </div>
       </div>
 
-      <div style={{ position: 'absolute', bottom: 90, left: '50%', transform: 'translateX(-50%)', fontFamily: 'var(--sans)', fontSize: 30, color: 'rgba(254,248,245,0.5)', letterSpacing: '0.08em' }}>zuri.app</div>
+      <div style={{ position: 'absolute', bottom: 90, left: '50%', transform: 'translateX(-50%)', fontFamily: 'var(--sans)', fontSize: 30, color: 'rgba(254,248,245,0.5)', letterSpacing: '0.08em' }}>zuribook.page</div>
     </div>
   )
 }
