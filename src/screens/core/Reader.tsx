@@ -40,13 +40,25 @@ export function Reader() {
 
   const applyTheme = useCallback((r: any, t: string, fs: number, lh: string, ff: string) => {
     const { bg, text } = THEMES[t] ?? THEMES['sépia']
-    r.themes.override('body', {
-      background: bg,
-      color: text,
-      fontFamily: ff === 'Nunito' ? 'Nunito, sans-serif' : ff === 'Georgia' ? 'Georgia, serif' : 'Lora, serif',
-      fontSize: `${fs}px`,
-      lineHeight: LH[lh] ?? '1.65',
-      padding: '0 8px',
+    const family = ff === 'Nunito' ? 'Nunito, sans-serif' : ff === 'Georgia' ? 'Georgia, serif' : 'Lora, serif'
+    const line = LH[lh] ?? '1.65'
+    // themes.default(selector -> regras) é a API correta. Constranger media evita
+    // o transbordo que parte o scroll contínuo em livros com imagens.
+    r.themes.default({
+      'html, body': {
+        'background': `${bg} !important`,
+        'color': `${text} !important`,
+        'font-family': `${family} !important`,
+        'font-size': `${fs}px !important`,
+        'line-height': `${line} !important`,
+        'padding': '0 16px !important',
+        'margin': '0 !important',
+        'max-width': '100% !important',
+        'overflow-x': 'hidden !important',
+      },
+      'p, li, span, div': { 'line-height': `${line} !important`, 'overflow-wrap': 'break-word', 'word-break': 'break-word' },
+      'img, image, svg, video, table': { 'max-width': '100% !important', 'height': 'auto !important' },
+      'a': { 'color': `${text} !important` },
     })
   }, [])
 
@@ -92,8 +104,10 @@ export function Reader() {
           setProg(pct)
         })
 
-        // generate locations in background for accurate progress
-        epubInstance.locations.generate(1024).catch(() => {})
+        // Locations dão a % exacta mas é um loop pesado — adiado para não travar o scroll inicial.
+        setTimeout(() => {
+          if (!destroyed) epubInstance.locations.generate(1600).catch(() => {})
+        }, 1500)
       } catch (e) {
         if (!destroyed) {
           setError('Não foi possível abrir o livro.')
