@@ -7,6 +7,7 @@ interface User {
   name: string
   email: string
   genres: string[]
+  created_at?: string
 }
 
 interface AuthState {

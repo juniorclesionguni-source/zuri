@@ -4,7 +4,7 @@ import { Icon } from '../../components/ui/Icon'
 import { ReaderSettings } from './ReaderSettings'
 import { useCatalog } from '../../store/catalog'
 import { useAuthStore } from '../../store/auth'
-import { saveProgress } from '../../data/db'
+import { saveProgress, getProgress } from '../../data/db'
 import { progress as progressApi } from '../../data/services'
 
 const THEMES: Record<string, { bg: string; text: string }> = {
@@ -113,7 +113,9 @@ export function Reader() {
 
         applyTheme(renditionInstance, theme, fontSize, lineHeight, fontFamily)
 
-        await renditionInstance.display()
+        // A1.6: retoma na posição guardada (Dexie)
+        const saved = user?.id && id ? await getProgress(user.id, id) : null
+        await renditionInstance.display(saved?.lastCfi || undefined)
         if (destroyed) return
         setLoading(false)
 

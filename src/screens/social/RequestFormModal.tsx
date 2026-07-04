@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Icon } from '../../components/ui/Icon'
 import { useStatsStore } from '../../store/stats'
+import { useAuthStore } from '../../store/auth'
 
 const SUGGESTIONS = [
   { title: 'O Alquimista', author: 'Paulo Coelho', exists: true, votes: 342 },
@@ -19,6 +20,7 @@ interface SuggestionItem {
 
 export function RequestFormModal({ onClose }: { onClose: () => void }) {
   const addXP = useStatsStore((s) => s.addXP)
+  const user = useAuthStore((s) => s.user)
   const [step, setStep] = useState<'form' | 'confirm'>('form')
   const [query, setQuery] = useState('')
   const [picked, setPicked] = useState<SuggestionItem | null>(null)
@@ -33,6 +35,11 @@ export function RequestFormModal({ onClose }: { onClose: () => void }) {
   const submit = () => {
     addXP(50)
     setStep('confirm')
+    if (user?.id) {
+      import('../../data/api/requests').then(({ createRequest }) =>
+        createRequest({ title: query, author, userId: user.id }).catch(() => {})
+      )
+    }
   }
 
   return (

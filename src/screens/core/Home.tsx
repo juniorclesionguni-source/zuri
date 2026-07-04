@@ -7,13 +7,22 @@ import { ZuriMark } from '../../components/ui/ZuriMark'
 import { QUOTE } from '../../data/catalog'
 import { useAuthStore } from '../../store/auth'
 import { useCatalog } from '../../store/catalog'
+import { useLibrary } from '../../store/library'
 
 export function Home({ onShare }: { onShare: (kind: string) => void }) {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const books = useCatalog((s) => s.books)
+  const progress = useLibrary((s) => s.progress)
   const name = user?.name?.split(' ')[0] ?? 'Leitor'
-  const progressBook = books[0] ? { ...books[0], progress: 34 } : null
+
+  const month = new Date().toLocaleString('pt-PT', { month: 'long' })
+  const monthLabel = month.charAt(0).toUpperCase() + month.slice(1)
+
+  // Livro em progresso mais recente (0 < pct < 95)
+  const progressBook = books
+    .filter((b) => { const p = progress[b.id]; return p && p.pct > 0 && p.pct < 95 })
+    .sort((a, b) => (progress[b.id]?.updatedAt ?? 0) - (progress[a.id]?.updatedAt ?? 0))[0] ?? null
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>
@@ -25,7 +34,6 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
         </div>
         <div style={{ position: 'relative', flexShrink: 0, paddingTop: 6 }}>
           <Icon name="bell" size={22} color="var(--text2)" strokeWidth={1.5} />
-          <div style={{ position: 'absolute', top: 4, right: -2, width: 8, height: 8, borderRadius: 4, background: 'var(--accent)' }} />
         </div>
       </div>
 
@@ -39,7 +47,7 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
         </div>
         <div style={{ flex: 1, zIndex: 1 }}>
           <div style={{ fontFamily: 'var(--sans)', fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.8 }}>Novo</div>
-          <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 18, marginTop: 4 }}>O teu Setembro chegou</div>
+          <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 18, marginTop: 4 }}>O teu {monthLabel} chegou</div>
         </div>
         <Icon name="chevron-right" size={22} strokeWidth={2} color="#FEF8F5" />
       </div>
@@ -59,9 +67,9 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
               <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text3)', marginTop: 2 }}>{progressBook.author}</div>
               <div style={{ marginTop: 10 }}>
                 <div style={{ height: 3, background: 'var(--border)', borderRadius: 2 }}>
-                  <div style={{ width: '34%', height: '100%', background: 'var(--accent)', borderRadius: 2 }} />
+                  <div style={{ width: `${progress[progressBook.id]?.pct ?? 0}%`, height: '100%', background: 'var(--accent)', borderRadius: 2 }} />
                 </div>
-                <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 4 }}>34% · cap. 3</div>
+                <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 4 }}>{progress[progressBook.id]?.pct ?? 0}%</div>
               </div>
             </div>
           </div>

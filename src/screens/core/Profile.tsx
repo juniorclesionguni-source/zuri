@@ -18,6 +18,13 @@ export function Profile({ onLevelUp, onShare }: { onLevelUp: () => void; onShare
 
   const initial = (user?.name ?? 'U')[0]
 
+  const memberSince = user?.created_at
+    ? `Membro desde ${new Date(user.created_at).toLocaleString('pt-PT', { month: 'long', year: 'numeric' })}`
+    : 'Leitor Zuri'
+
+  const currentMonth = new Date().toLocaleString('pt-PT', { month: 'long' })
+  const monthLabel = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)
+
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>
       <div style={{ padding: '60px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
@@ -27,7 +34,7 @@ export function Profile({ onLevelUp, onShare }: { onLevelUp: () => void; onShare
           <Icon name="award" size={13} strokeWidth={2} color="var(--accent)" />
           {currentLevel.name} · Nível {currentLevel.n}
         </div>
-        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 4 }}>Membro desde março 2025</div>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 4 }}>{memberSince}</div>
       </div>
 
       {/* XP bar */}
@@ -72,10 +79,9 @@ export function Profile({ onLevelUp, onShare }: { onLevelUp: () => void; onShare
       {/* Shortcuts */}
       <div style={{ margin: '24px 20px 0', background: 'var(--bg2)', borderRadius: 16, overflow: 'hidden' }}>
         {[
-          { icon: 'bar-chart', label: 'Stats detalhados', action: undefined },
           { icon: 'award', label: 'As minhas conquistas', action: onLevelUp },
           { icon: 'crown', label: 'A minha subscrição', action: () => navigate('/paywall') },
-          { icon: 'share-2', label: 'Partilhar o meu Setembro', action: () => onShare('wrapped') },
+          { icon: 'share-2', label: `Partilhar o meu ${monthLabel}`, action: () => onShare('wrapped') },
           { icon: dark ? 'sun' : 'moon', label: dark ? 'Modo claro' : 'Modo escuro', action: toggleDark },
         ].map((item, i, arr) => (
           <div key={item.label} onClick={item.action} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', borderBottom: i < arr.length - 1 ? '0.5px solid var(--border)' : 'none', cursor: 'pointer' }}>

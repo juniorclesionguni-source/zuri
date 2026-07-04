@@ -4,12 +4,18 @@ import { Icon } from '../../components/ui/Icon'
 import { QUOTE } from '../../data/catalog'
 import { useStatsStore } from '../../store/stats'
 import { useCatalog } from '../../store/catalog'
+import { useLibrary } from '../../store/library'
 
 export function Reading({ onShare }: { onShare: (kind: string) => void }) {
   const navigate = useNavigate()
   const { streakDays } = useStatsStore()
   const books = useCatalog((s) => s.books)
-  const reading = books.slice(0, 3).map((b, i) => ({ ...b, progress: [34, 72, 15][i], chapter: ['Cap. 3', 'Cap. 11', 'Cap. 1'][i] }))
+  const progress = useLibrary((s) => s.progress)
+
+  // Todos os livros em progresso (0 < pct < 95), do mais recente para o mais antigo
+  const reading = books
+    .filter((b) => { const p = progress[b.id]; return p && p.pct > 0 && p.pct < 95 })
+    .sort((a, b) => (progress[b.id]?.updatedAt ?? 0) - (progress[a.id]?.updatedAt ?? 0))
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>
@@ -33,27 +39,38 @@ export function Reading({ onShare }: { onShare: (kind: string) => void }) {
       {/* Continua a ler */}
       <div>
         <div style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 700, color: 'var(--text3)', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '0 20px', marginBottom: 14 }}>Continua a ler</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 20px' }}>
-          {reading.map((b) => (
-            <div
-              key={b.id}
-              onClick={() => navigate(`/reader/${b.id}`)}
-              style={{ display: 'flex', gap: 14, background: 'var(--bg2)', borderRadius: 14, padding: 12, alignItems: 'center', cursor: 'pointer' }}
-            >
-              <BookCover title={b.title} author={b.author.split(' ').slice(-1)[0]} w={64} h={96} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
-                <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text3)', marginTop: 2 }}>{b.chapter}</div>
-                <div style={{ marginTop: 10 }}>
-                  <div style={{ height: 3, background: 'var(--border)', borderRadius: 2 }}>
-                    <div style={{ width: `${b.progress}%`, height: '100%', background: 'var(--accent)', borderRadius: 2 }} />
+        {reading.length === 0 ? (
+          <div style={{ padding: '32px 20px', textAlign: 'center' }}>
+            <Icon name="book-open" size={36} color="var(--text3)" strokeWidth={1} />
+            <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text3)', marginTop: 14 }}>Ainda não começaste nenhum livro</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '0 20px' }}>
+            {reading.map((b) => {
+              const pct = progress[b.id]?.pct ?? 0
+              const minsLeft = Math.max(1, Math.round(b.mins * (1 - pct / 100)))
+              return (
+                <div
+                  key={b.id}
+                  onClick={() => navigate(`/reader/${b.id}`)}
+                  style={{ display: 'flex', gap: 14, background: 'var(--bg2)', borderRadius: 14, padding: 12, alignItems: 'center', cursor: 'pointer' }}
+                >
+                  <BookCover title={b.title} author={b.author.split(' ').slice(-1)[0]} w={64} h={96} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
+                    <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text3)', marginTop: 2 }}>{b.author}</div>
+                    <div style={{ marginTop: 10 }}>
+                      <div style={{ height: 3, background: 'var(--border)', borderRadius: 2 }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: 'var(--accent)', borderRadius: 2 }} />
+                      </div>
+                      <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 4 }}>{pct}% · ~{minsLeft} min restantes</div>
+                    </div>
                   </div>
-                  <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 4 }}>{b.progress}% · ~{Math.round(b.mins * (1 - b.progress / 100))} min restantes</div>
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Citação guardada */}

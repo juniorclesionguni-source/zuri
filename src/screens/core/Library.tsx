@@ -1,37 +1,51 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BookCard } from '../../components/ui/BookCard'
-import { BookCover } from '../../components/ui/BookCover'
 import { Icon } from '../../components/ui/Icon'
 import { useCatalog } from '../../store/catalog'
+import { useLibrary } from '../../store/library'
 import type { Book } from '../../data/catalog'
 
 const TABS = ['A ler', 'Por ler', 'Terminados', 'Favoritos', 'Baixados']
+
+const EMPTY: Record<string, string> = {
+  'A ler':      'Ainda não começaste nenhum livro',
+  'Por ler':    'Todos os livros já têm progresso',
+  'Terminados': 'Ainda não terminaste nenhum livro',
+  'Favoritos':  'Ainda não adicionaste favoritos',
+  'Baixados':   'Ainda sem downloads',
+}
 
 export function Library() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('A ler')
   const books = useCatalog((s) => s.books)
+  const progress = useLibrary((s) => s.progress)
+  const favorites = useLibrary((s) => s.favorites)
+
+  const inProgress = books.filter((b) => { const p = progress[b.id]; return p && p.pct > 0 && p.pct < 95 })
+  const finished   = books.filter((b) => { const p = progress[b.id]; return p && (p.pct >= 95 || p.finished) })
+  const unread     = books.filter((b) => !progress[b.id])
+  const favBooks   = books.filter((b) => favorites.has(b.id))
 
   const ITEMS: Record<string, Book[]> = {
-    'A ler': books.slice(0, 4),
-    'Por ler': books.slice(3, 8),
-    'Terminados': books.slice(4, 9),
-    'Favoritos': books.slice(0, 6),
+    'A ler':      inProgress,
+    'Por ler':    unread,
+    'Terminados': finished,
+    'Favoritos':  favBooks,
   }
-  const DOWNLOADS = books.length >= 7 ? [
-    { book: books[0], size: '42 MB', status: 'done' as const },
-    { book: books[1], size: '51 MB', status: 'done' as const },
-    { book: books[6], size: '28 MB', status: 'done' as const },
-    { book: books[3], size: '34 MB', status: 'downloading' as const, progress: 64 },
-  ] : []
+
+  // Livros únicos na estante (com progresso + favoritos)
+  const shelfCount = new Set([...Object.keys(progress), ...Array.from(favorites)]).size
+
+  const list = ITEMS[tab] ?? []
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>
       <div style={{ padding: '60px 20px 0' }}>
         <h1 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 32, color: 'var(--text)', margin: 0 }}>My Zuri</h1>
         <p style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--text3)', margin: '4px 0 0' }}>
-          {tab === 'Baixados' ? '4 livros offline · 128 MB' : '23 livros na tua estante'}
+          {tab === 'Baixados' ? 'Ainda sem downloads' : `${shelfCount} livros na tua estante`}
         </p>
       </div>
 
@@ -55,56 +69,26 @@ export function Library() {
       )}
 
       {tab === 'Baixados' ? (
-        <>
-          <div style={{ margin: '20px 20px 14px', padding: 14, background: 'var(--bg2)', borderRadius: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="wifi-off" size={16} color="var(--accent)" strokeWidth={2} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>Leitura offline</div>
-              <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>Estes livros estão no teu dispositivo</div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontFamily: 'var(--sans)', fontWeight: 700, color: 'var(--text2)', fontSize: 13 }}>128 MB</div>
-              <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)' }}>de 2 GB</div>
-            </div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 20px' }}>
-            {DOWNLOADS.map(({ book, size, status, progress }) => (
-              <div key={book.id} onClick={() => navigate(`/book/${book.id}`)} style={{ display: 'flex', gap: 12, padding: 10, background: 'var(--bg2)', borderRadius: 12, cursor: 'pointer', alignItems: 'center' }}>
-                <BookCover title={book.title} author={book.author.split(' ').slice(-1)[0]} w={44} h={66} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{book.title}</div>
-                  <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>{book.author}</div>
-                  {status === 'downloading' && (
-                    <div style={{ height: 2, background: 'var(--border)', borderRadius: 1, marginTop: 6 }}>
-                      <div style={{ width: `${progress ?? 0}%`, height: '100%', background: 'var(--accent)', borderRadius: 1 }} />
-                    </div>
-                  )}
-                </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  {status === 'done' ? (
-                    <>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--success)', fontWeight: 700 }}>
-                        <Icon name="check" size={12} color="var(--success)" strokeWidth={2.5} /> Offline
-                      </div>
-                      <div style={{ fontFamily: 'var(--sans)', fontSize: 10, color: 'var(--text3)', marginTop: 2 }}>{size}</div>
-                    </>
-                  ) : (
-                    <>
-                      <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--accent)', fontWeight: 700 }}>A baixar…</div>
-                      <div style={{ fontFamily: 'var(--sans)', fontSize: 10, color: 'var(--text3)', marginTop: 2 }}>{progress}% · {size}</div>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
+        <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+          <Icon name="download" size={40} color="var(--text3)" strokeWidth={1} />
+          <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text3)', marginTop: 16 }}>Ainda sem downloads</p>
+        </div>
+      ) : list.length === 0 ? (
+        <div style={{ padding: '60px 20px', textAlign: 'center' }}>
+          <Icon name="book-open" size={40} color="var(--text3)" strokeWidth={1} />
+          <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text3)', marginTop: 16 }}>{EMPTY[tab]}</p>
+        </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, padding: '0 20px' }}>
-          {(ITEMS[tab] ?? []).map((b) => (
-            <BookCard key={b.id} book={b} onClick={() => navigate(`/book/${b.id}`)} w={150} showProgress={tab === 'A ler'} progress={Math.floor(((b.title.length * 7) % 70) + 10)} />
+          {list.map((b) => (
+            <BookCard
+              key={b.id}
+              book={b}
+              onClick={() => navigate(`/book/${b.id}`)}
+              w={150}
+              showProgress={tab === 'A ler'}
+              progress={progress[b.id]?.pct ?? 0}
+            />
           ))}
         </div>
       )}

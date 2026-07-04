@@ -70,3 +70,7 @@ export async function saveProgress(userId: string, bookId: string, pct: number, 
     await db.readingProgress.add({ userId, bookId, lastCfi: cfi, progressPct: newPct, isFinished: newPct >= 95, updatedAt: Date.now() })
   }
 }
+
+export async function getAllProgress(userId: string) {
+  return db.readingProgress.where({ userId }).toArray()
+}

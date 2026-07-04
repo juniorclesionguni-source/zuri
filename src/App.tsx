@@ -4,6 +4,7 @@ import { useUIStore } from './store/ui'
 import { useAuthStore } from './store/auth'
 import { useCatalog } from './store/catalog'
 import { useStatsStore } from './store/stats'
+import { useLibrary } from './store/library'
 import { isSupabaseConfigured } from './lib/supabaseConfig'
 import { auth } from './data/services'
 
@@ -118,6 +119,14 @@ export default function App() {
   // Stats: carrega do servidor quando o utilizador faz login.
   useEffect(() => {
     if (user?.id) useStatsStore.getState().load(user.id)
+  }, [user?.id])
+
+  // Progresso e favoritos: carrega quando o utilizador faz login.
+  useEffect(() => {
+    if (user?.id) {
+      useLibrary.getState().loadProgress(user.id)
+      useLibrary.getState().loadFavorites(user.id)
+    }
   }, [user?.id])
 
   return (
