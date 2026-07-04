@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Icon } from '../../components/ui/Icon'
 import { ReaderSettings } from './ReaderSettings'
-import { BOOKS } from '../../data/catalog'
+import { useCatalog } from '../../store/catalog'
 import { useAuthStore } from '../../store/auth'
 import { saveProgress } from '../../data/db'
 import { progress as progressApi } from '../../data/services'
@@ -20,7 +20,9 @@ export function Reader() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
-  const book = BOOKS.find((b) => b.id === id) ?? BOOKS[0]
+  const books = useCatalog((s) => s.books)
+  const loaded = useCatalog((s) => s.loaded)
+  const book = books.find((b) => b.id === id)
 
   const containerRef = useRef<HTMLDivElement>(null)
   const renditionRef = useRef<any>(null)
@@ -61,7 +63,8 @@ export function Reader() {
   }, [])
 
   useEffect(() => {
-    if (!containerRef.current || !book.epub_path) {
+    if (!loaded) return // aguarda catálogo
+    if (!containerRef.current || !book?.epub_path) {
       setError('EPUB não disponível')
       setLoading(false)
       return
@@ -74,7 +77,7 @@ export function Reader() {
     ;(async () => {
       try {
         const ePub = (await import('epubjs')).default
-        epubInstance = ePub(book.epub_path!)
+        epubInstance = ePub(book!.epub_path!)
         epubRef.current = epubInstance
 
         renditionInstance = epubInstance.renderTo(containerRef.current!, {
@@ -137,7 +140,7 @@ export function Reader() {
       renditionInstance?.destroy()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [book.epub_path])
+  }, [book?.epub_path, loaded])
 
   // sync theme/size changes to rendition
   useEffect(() => {
@@ -146,10 +149,10 @@ export function Reader() {
 
   // save progress
   useEffect(() => {
-    if (!user?.id || prog === 0) return
+    if (!user?.id || !book?.id || prog === 0) return
     saveProgress(user.id, book.id, prog)
     progressApi.sync(user.id, book.id, prog).catch(() => {})
-  }, [prog, book.id, user?.id])
+  }, [prog, book?.id, user?.id])
 
   const { bg } = THEMES[theme] ?? THEMES['sépia']
 
@@ -202,7 +205,7 @@ export function Reader() {
         <div onClick={(e) => { e.stopPropagation(); navigate(-1) }} style={{ cursor: 'pointer', padding: 8 }}>
           <Icon name="chevron-left" size={22} color="#3A2020" strokeWidth={2} />
         </div>
-        <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: '#6B4A4A', fontWeight: 600 }}>{book.title}</div>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: '#6B4A4A', fontWeight: 600 }}>{book?.title ?? ''}</div>
         <div onClick={(e) => { e.stopPropagation(); setShowSettings(true) }} style={{ cursor: 'pointer', padding: 4 }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3A2020" strokeWidth="1.8" strokeLinecap="round">
             <path d="M4 7h3M10 7h10M4 12h10M17 12h3M4 17h3M10 17h10"/>
@@ -223,7 +226,7 @@ export function Reader() {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--sans)', fontSize: 11, color: '#9B8080', marginBottom: 8 }}>
           <span>{prog}% lido</span>
-          <span>~ {Math.max(1, Math.round(book.mins * (1 - prog / 100)))} min restantes</span>
+          <span>~ {Math.max(1, Math.round((book?.mins ?? 0) * (1 - prog / 100)))} min restantes</span>
         </div>
         <div style={{ height: 3, background: 'rgba(58,32,32,0.12)', borderRadius: 2 }}>
           <div style={{ width: `${prog}%`, height: '100%', background: '#C96A58', borderRadius: 2, transition: 'width 0.5s' }} />

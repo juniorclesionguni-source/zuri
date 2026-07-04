@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useUIStore } from './store/ui'
 import { useAuthStore } from './store/auth'
+import { useCatalog } from './store/catalog'
+import { useStatsStore } from './store/stats'
 import { isSupabaseConfigured } from './lib/supabaseConfig'
 import { auth } from './data/services'
 
@@ -94,6 +96,7 @@ function AppShell() {
 export default function App() {
   const dark = useUIStore((s) => s.dark)
   const hydrate = useAuthStore((s) => s.hydrate)
+  const user = useAuthStore((s) => s.user)
 
   useEffect(() => {
     const html = document.documentElement
@@ -108,6 +111,14 @@ export default function App() {
     auth.subscribe(hydrate).then((fn) => { unsub = fn })
     return () => unsub()
   }, [hydrate])
+
+  // Catálogo: leitura pública, carrega logo no arranque independente de login.
+  useEffect(() => { useCatalog.getState().load() }, [])
+
+  // Stats: carrega do servidor quando o utilizador faz login.
+  useEffect(() => {
+    if (user?.id) useStatsStore.getState().load(user.id)
+  }, [user?.id])
 
   return (
     <BrowserRouter>

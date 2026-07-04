@@ -1,13 +1,15 @@
 import { useNavigate } from 'react-router-dom'
 import { BookCover } from '../../components/ui/BookCover'
 import { Icon } from '../../components/ui/Icon'
-import { BOOKS, QUOTE } from '../../data/catalog'
+import { QUOTE } from '../../data/catalog'
 import { useStatsStore } from '../../store/stats'
+import { useCatalog } from '../../store/catalog'
 
 export function Reading({ onShare }: { onShare: (kind: string) => void }) {
   const navigate = useNavigate()
   const { streakDays } = useStatsStore()
-  const reading = BOOKS.slice(0, 3).map((b, i) => ({ ...b, progress: [34, 72, 15][i], chapter: ['Cap. 3', 'Cap. 11', 'Cap. 1'][i] }))
+  const books = useCatalog((s) => s.books)
+  const reading = books.slice(0, 3).map((b, i) => ({ ...b, progress: [34, 72, 15][i], chapter: ['Cap. 3', 'Cap. 11', 'Cap. 1'][i] }))
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>

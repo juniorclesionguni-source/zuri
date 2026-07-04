@@ -4,14 +4,16 @@ import { BookCard } from '../../components/ui/BookCard'
 import { BookCover } from '../../components/ui/BookCover'
 import { Icon } from '../../components/ui/Icon'
 import { ZuriMark } from '../../components/ui/ZuriMark'
-import { BOOKS, QUOTE } from '../../data/catalog'
+import { QUOTE } from '../../data/catalog'
 import { useAuthStore } from '../../store/auth'
+import { useCatalog } from '../../store/catalog'
 
 export function Home({ onShare }: { onShare: (kind: string) => void }) {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
+  const books = useCatalog((s) => s.books)
   const name = user?.name?.split(' ')[0] ?? 'Leitor'
-  const progressBook = { ...BOOKS[0], progress: 34 }
+  const progressBook = books[0] ? { ...books[0], progress: 34 } : null
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>
@@ -43,6 +45,7 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
       </div>
 
       {/* Continua a ler */}
+      {progressBook && (
       <div style={{ marginTop: 32 }}>
         <SectionHeader action="Ver tudo">Continua a ler</SectionHeader>
         <div className="hide-scrollbar" style={{ display: 'flex', gap: 14, overflowX: 'auto', padding: '0 20px' }}>
@@ -64,12 +67,13 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
           </div>
         </div>
       </div>
+      )}
 
       {/* Sugestões */}
       <div style={{ marginTop: 32 }}>
         <SectionHeader action="Ver tudo">Sugestões para ti</SectionHeader>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, padding: '0 20px' }}>
-          {BOOKS.slice(1, 5).map((b) => (
+          {books.slice(1, 5).map((b) => (
             <BookCard key={b.id} book={b} onClick={() => navigate(`/book/${b.id}`)} w={150} />
           ))}
         </div>
@@ -79,7 +83,7 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
       <div style={{ marginTop: 32 }}>
         <SectionHeader action="Ver tudo">Novidades no Zuri</SectionHeader>
         <div className="hide-scrollbar" style={{ display: 'flex', gap: 14, overflowX: 'auto', padding: '0 20px' }}>
-          {BOOKS.slice(5, 10).map((b) => (
+          {books.slice(5, 10).map((b) => (
             <div key={b.id} style={{ position: 'relative' }}>
               <BookCard book={b} onClick={() => navigate(`/book/${b.id}`)} w={120} />
               <div style={{ position: 'absolute', top: 8, left: 8, padding: '3px 7px', background: 'var(--accent)', color: '#FEF8F5', fontFamily: 'var(--sans)', fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', borderRadius: 3 }}>NOVO</div>

@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useAuthStore } from './auth'
+import type { UserStatsRow } from '../data/api/stats'
 
 interface StatsState {
   xp: number
@@ -9,25 +11,56 @@ interface StatsState {
   hoursRead: number
   addXP: (amount: number) => void
   incrementStreak: () => void
+  hydrate: (stats: UserStatsRow) => void
+  load: (userId: string) => Promise<void>
 }
 
 const LEVEL_XP = [0, 2500, 8000, 20000]
 
 export const useStatsStore = create<StatsState>()(
   persist(
-    (set) => ({
-      xp: 12400,
-      level: 3,
-      streakDays: 14,
-      booksRead: 23,
-      hoursRead: 164,
+    (set, get) => ({
+      xp: 0,
+      level: 1,
+      streakDays: 0,
+      booksRead: 0,
+      hoursRead: 0,
       addXP: (amount) =>
         set((s) => {
           const newXP = s.xp + amount
-          const newLevel = LEVEL_XP.filter((t) => newXP >= t).length
-          return { xp: newXP, level: Math.min(newLevel, 4) }
+          const newLevel = Math.min(LEVEL_XP.filter((t) => newXP >= t).length, 4)
+          const uid = useAuthStore.getState().user?.id
+          if (uid) {
+            void import('../data/api/stats').then(({ saveStats }) =>
+              saveStats(uid, { xp: newXP, level: newLevel }).catch(() => {})
+            )
+          }
+          return { xp: newXP, level: newLevel }
         }),
-      incrementStreak: () => set((s) => ({ streakDays: s.streakDays + 1 })),
+      incrementStreak: () =>
+        set((s) => {
+          const newStreak = s.streakDays + 1
+          const uid = useAuthStore.getState().user?.id
+          if (uid) {
+            void import('../data/api/stats').then(({ saveStats }) =>
+              saveStats(uid, { streak_days: newStreak }).catch(() => {})
+            )
+          }
+          return { streakDays: newStreak }
+        }),
+      hydrate: (stats) =>
+        set({
+          xp: stats.xp,
+          level: stats.level,
+          streakDays: stats.streak_days,
+          booksRead: stats.books_read,
+          hoursRead: stats.hours_read,
+        }),
+      load: async (userId) => {
+        const { fetchStats } = await import('../data/api/stats')
+        const row = await fetchStats(userId)
+        if (row) get().hydrate(row)
+      },
     }),
     { name: 'zuri-stats' }
   )

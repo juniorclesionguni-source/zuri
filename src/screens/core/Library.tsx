@@ -3,25 +3,28 @@ import { useNavigate } from 'react-router-dom'
 import { BookCard } from '../../components/ui/BookCard'
 import { BookCover } from '../../components/ui/BookCover'
 import { Icon } from '../../components/ui/Icon'
-import { BOOKS } from '../../data/catalog'
+import { useCatalog } from '../../store/catalog'
+import type { Book } from '../../data/catalog'
 
 const TABS = ['A ler', 'Por ler', 'Terminados', 'Favoritos', 'Baixados']
-const ITEMS: Record<string, typeof BOOKS> = {
-  'A ler': BOOKS.slice(0, 4),
-  'Por ler': BOOKS.slice(3, 8),
-  'Terminados': BOOKS.slice(4, 9),
-  'Favoritos': BOOKS.slice(0, 6),
-}
-const DOWNLOADS = [
-  { book: BOOKS[0], size: '42 MB', status: 'done' as const },
-  { book: BOOKS[1], size: '51 MB', status: 'done' as const },
-  { book: BOOKS[6], size: '28 MB', status: 'done' as const },
-  { book: BOOKS[3], size: '34 MB', status: 'downloading' as const, progress: 64 },
-]
 
 export function Library() {
   const navigate = useNavigate()
   const [tab, setTab] = useState('A ler')
+  const books = useCatalog((s) => s.books)
+
+  const ITEMS: Record<string, Book[]> = {
+    'A ler': books.slice(0, 4),
+    'Por ler': books.slice(3, 8),
+    'Terminados': books.slice(4, 9),
+    'Favoritos': books.slice(0, 6),
+  }
+  const DOWNLOADS = books.length >= 7 ? [
+    { book: books[0], size: '42 MB', status: 'done' as const },
+    { book: books[1], size: '51 MB', status: 'done' as const },
+    { book: books[6], size: '28 MB', status: 'done' as const },
+    { book: books[3], size: '34 MB', status: 'downloading' as const, progress: 64 },
+  ] : []
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>

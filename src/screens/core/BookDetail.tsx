@@ -5,14 +5,33 @@ import { BookCard } from '../../components/ui/BookCard'
 import { PrimaryButton, GhostButton } from '../../components/ui/Button'
 import { SectionHeader } from '../../components/ui/SectionHeader'
 import { Icon } from '../../components/ui/Icon'
-import { BOOKS } from '../../data/catalog'
+import { useCatalog } from '../../store/catalog'
 import { useSubStore } from '../../store/subscription'
 
 export function BookDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { status } = useSubStore()
-  const book = BOOKS.find((b) => b.id === id) ?? BOOKS[0]
+  const loaded = useCatalog((s) => s.loaded)
+  const books = useCatalog((s) => s.books)
+  const book = books.find((b) => b.id === id)
+
+  if (!loaded) {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, borderRadius: 16, border: '2.5px solid var(--border)', borderTopColor: 'var(--accent)', animation: 'zspin 1s linear infinite' }} />
+      </div>
+    )
+  }
+
+  if (!book) {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+        <p style={{ fontFamily: 'var(--sans)', color: 'var(--text2)' }}>Livro não encontrado</p>
+        <button onClick={() => navigate(-1)} style={{ fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 600, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}>Voltar</button>
+      </div>
+    )
+  }
 
   const handleRead = () => {
     if (status !== 'active') navigate('/paywall')
@@ -92,7 +111,7 @@ export function BookDetail() {
       <div style={{ paddingTop: 32 }}>
         <SectionHeader>Leitores também leram</SectionHeader>
         <div className="hide-scrollbar" style={{ display: 'flex', gap: 14, overflowX: 'auto', padding: '0 20px' }}>
-          {BOOKS.filter((b) => b.id !== book.id).slice(0, 5).map((b) => (
+          {books.filter((b) => b.id !== book.id).slice(0, 5).map((b) => (
             <BookCard key={b.id} book={b} onClick={() => navigate(`/book/${b.id}`)} w={100} />
           ))}
         </div>

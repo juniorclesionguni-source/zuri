@@ -2,12 +2,13 @@ import { useNavigate } from 'react-router-dom'
 import { Icon } from '../../components/ui/Icon'
 import { ZuriMark } from '../../components/ui/ZuriMark'
 import { BookCover } from '../../components/ui/BookCover'
-import { BOOKS } from '../../data/catalog'
+import { useCatalog } from '../../store/catalog'
 import { useStatsStore } from '../../store/stats'
 
 export function Wrapped({ onShare }: { onShare: (kind: string) => void }) {
   const navigate = useNavigate()
   const { booksRead, hoursRead, streakDays } = useStatsStore()
+  const books = useCatalog((s) => s.books)
   const stats = [
     ['Livros lidos', String(booksRead)],
     ['Horas', `${hoursRead}h`],
@@ -40,10 +41,10 @@ export function Wrapped({ onShare }: { onShare: (kind: string) => void }) {
       </div>
 
       <div style={{ margin: '30px 24px 0', padding: 20, borderRadius: 16, background: 'rgba(254,248,245,0.12)', display: 'flex', gap: 14, alignItems: 'center' }}>
-        <BookCover title={BOOKS[0].title} author="Couto" w={60} h={90} />
+        <BookCover title={books[0]?.title ?? ''} author="Couto" w={60} h={90} />
         <div>
           <div style={{ fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.8 }}>Livro do mês</div>
-          <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, fontWeight: 500, marginTop: 4 }}>{BOOKS[0].title}</div>
+          <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, fontWeight: 500, marginTop: 4 }}>{books[0]?.title ?? ''}</div>
           <div style={{ fontFamily: 'var(--sans)', fontSize: 12, opacity: 0.85 }}>8 dias · 5h 40min</div>
         </div>
       </div>
