@@ -75,6 +75,21 @@ export function Reader() {
         })
         renditionRef.current = renditionInstance
 
+        // Zonas de toque DENTRO do iframe (cliques no iframe não sobem para o React):
+        // 30% esquerda = página anterior, 30% direita = seguinte, centro = alterna o chrome.
+        renditionInstance.hooks.content.register((contents: any) => {
+          contents.document.addEventListener('click', (e: MouseEvent) => {
+            const w = contents.window.innerWidth
+            if (e.clientX < w * 0.3) renditionInstance.prev()
+            else if (e.clientX > w * 0.7) renditionInstance.next()
+            else setChromeVisible((v) => !v)
+          })
+        })
+        renditionInstance.on('keyup', (e: KeyboardEvent) => {
+          if (e.key === 'ArrowRight') renditionInstance.next()
+          else if (e.key === 'ArrowLeft') renditionInstance.prev()
+        })
+
         applyTheme(renditionInstance, theme, fontSize, lineHeight, fontFamily)
 
         await renditionInstance.display()
@@ -116,9 +131,17 @@ export function Reader() {
     progressApi.sync(user.id, book.id, prog).catch(() => {})
   }, [prog, book.id, user?.id])
 
-  const prev = (e: React.MouseEvent) => { e.stopPropagation(); renditionRef.current?.prev() }
-  const next = (e: React.MouseEvent) => { e.stopPropagation(); renditionRef.current?.next() }
   const { bg } = THEMES[theme] ?? THEMES['sépia']
+
+  // Setas do teclado quando o foco está fora do iframe (desktop).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') renditionRef.current?.next()
+      else if (e.key === 'ArrowLeft') renditionRef.current?.prev()
+    }
+    window.addEventListener('keyup', onKey)
+    return () => window.removeEventListener('keyup', onKey)
+  }, [])
 
   return (
     <div
@@ -194,9 +217,7 @@ export function Reader() {
         </div>
       )}
 
-      {/* Page turn zones */}
-      <div onClick={prev} style={{ position: 'absolute', left: 0, top: 100, bottom: 100, width: 60, cursor: 'w-resize', zIndex: 15 }} />
-      <div onClick={next} style={{ position: 'absolute', right: 0, top: 100, bottom: 100, width: 60, cursor: 'e-resize', zIndex: 15 }} />
+      {/* Navegação por toque/tecla é feita dentro do iframe (hooks.content) — ver efeito acima. */}
 
       {showSettings && (
         <ReaderSettings
