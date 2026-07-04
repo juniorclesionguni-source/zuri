@@ -86,8 +86,8 @@ export function Reader() {
         })
         renditionRef.current = renditionInstance
 
-        // Kindle-like, tudo DENTRO do iframe (cliques do epubjs não sobem para o React):
-        // deslizar ou tocar na borda esq/dir vira a página; tocar no centro mostra a barra.
+        // Tudo DENTRO do iframe (cliques do epubjs não sobem para o React):
+        // SÓ o swipe vira a página; qualquer toque mostra/esconde a barra.
         renditionInstance.hooks.content.register((contents: any) => {
           const doc = contents.document
           let x0 = 0, y0 = 0, swiped = false
@@ -102,12 +102,9 @@ export function Reader() {
               if (dx < 0) renditionInstance.next(); else renditionInstance.prev()
             }
           }, { passive: true })
-          doc.addEventListener('click', (e: MouseEvent) => {
+          doc.addEventListener('click', () => {
             if (swiped) { swiped = false; return } // ignora o click que segue um swipe
-            const w = contents.window.innerWidth
-            if (e.clientX < w * 0.3) renditionInstance.prev()
-            else if (e.clientX > w * 0.7) renditionInstance.next()
-            else setChromeVisible((v) => !v)
+            setChromeVisible((v) => !v)            // qualquer toque alterna a barra
           })
         })
 
