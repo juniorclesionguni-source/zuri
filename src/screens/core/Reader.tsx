@@ -45,16 +45,14 @@ export function Reader() {
     // themes.default(selector -> regras) é a API correta. Constranger media evita
     // o transbordo que parte o scroll contínuo em livros com imagens.
     r.themes.default({
-      'html, body': {
+      // NB: nada de max-width/overflow-x no body — partiria a paginação em colunas do epubjs.
+      'body': {
         'background': `${bg} !important`,
         'color': `${text} !important`,
         'font-family': `${family} !important`,
         'font-size': `${fs}px !important`,
         'line-height': `${line} !important`,
-        'padding': '0 16px !important',
         'margin': '0 !important',
-        'max-width': '100% !important',
-        'overflow-x': 'hidden !important',
       },
       'p, li, span, div': { 'line-height': `${line} !important`, 'overflow-wrap': 'break-word', 'word-break': 'break-word' },
       'img, image, svg, video, table': { 'max-width': '100% !important', 'height': 'auto !important' },
@@ -82,14 +80,35 @@ export function Reader() {
         renditionInstance = epubInstance.renderTo(containerRef.current!, {
           width: '100%',
           height: '100%',
-          flow: 'scrolled',        // leitura contínua: o livro inteiro rola verticalmente
-          manager: 'continuous',   // carrega os capítulos seguintes à medida que rolas
+          flow: 'paginated',
+          spread: 'none',          // uma página de cada vez (Kindle)
+          minSpreadWidth: 100000,  // nunca mostrar 2 páginas lado a lado
         })
         renditionRef.current = renditionInstance
 
-        // Leitura por scroll — um toque no texto mostra/esconde a barra.
+        // Kindle-like, tudo DENTRO do iframe (cliques do epubjs não sobem para o React):
+        // deslizar ou tocar na borda esq/dir vira a página; tocar no centro mostra a barra.
         renditionInstance.hooks.content.register((contents: any) => {
-          contents.document.addEventListener('click', () => setChromeVisible((v) => !v))
+          const doc = contents.document
+          let x0 = 0, y0 = 0, swiped = false
+          doc.addEventListener('touchstart', (e: TouchEvent) => {
+            x0 = e.changedTouches[0].clientX; y0 = e.changedTouches[0].clientY; swiped = false
+          }, { passive: true })
+          doc.addEventListener('touchend', (e: TouchEvent) => {
+            const dx = e.changedTouches[0].clientX - x0
+            const dy = e.changedTouches[0].clientY - y0
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+              swiped = true
+              if (dx < 0) renditionInstance.next(); else renditionInstance.prev()
+            }
+          }, { passive: true })
+          doc.addEventListener('click', (e: MouseEvent) => {
+            if (swiped) { swiped = false; return } // ignora o click que segue um swipe
+            const w = contents.window.innerWidth
+            if (e.clientX < w * 0.3) renditionInstance.prev()
+            else if (e.clientX > w * 0.7) renditionInstance.next()
+            else setChromeVisible((v) => !v)
+          })
         })
 
         applyTheme(renditionInstance, theme, fontSize, lineHeight, fontFamily)
