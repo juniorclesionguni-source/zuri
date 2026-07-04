@@ -32,6 +32,8 @@ import { InstallPrompt } from './components/InstallPrompt'
 const ShareModal = lazy(() => import('./screens/social/ShareModal').then((m) => ({ default: m.ShareModal })))
 // Lazy: Reader é uma rota profunda, raramente a primeira; poupa ~40 KB no carregamento inicial
 const Reader = lazy(() => import('./screens/core/Reader').then((m) => ({ default: m.Reader })))
+// Lazy: StatsDetail é uma rota secundária, não precisa de estar no bundle inicial
+const StatsDetail = lazy(() => import('./screens/core/StatsDetail').then((m) => ({ default: m.StatsDetail })))
 
 function Spinner() {
   return (
@@ -67,6 +69,8 @@ function AppShell() {
           <Route path="/checkout"   element={<Checkout />} />
           <Route path="/processing" element={<Processing />} />
           <Route path="/success"    element={<Success />} />
+
+          <Route path="/stats"    element={<StatsDetail />} />
 
           <Route path="/wrapped"  element={<Wrapped onShare={setShareKind} />} />
           <Route path="/requests" element={<Requests />} />

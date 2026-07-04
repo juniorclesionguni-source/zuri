@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Icon } from '../../components/ui/Icon'
 import { useAuthStore } from '../../store/auth'
@@ -5,12 +6,26 @@ import { useStatsStore } from '../../store/stats'
 import { useUIStore } from '../../store/ui'
 import { LEVELS } from '../../data/catalog'
 
+function localDay(ts: number): string {
+  const d = new Date(ts)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 export function Profile({ onLevelUp, onShare }: { onLevelUp: () => void; onShare: (kind: string) => void }) {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const { xp, level, streakDays, booksRead, hoursRead } = useStatsStore()
   const toggleDark = useUIStore((s) => s.toggleDark)
   const dark = useUIStore((s) => s.dark)
+
+  const [dailyMins, setDailyMins] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    if (!user?.id) return
+    import('../../data/db').then(({ getDailyMinutes }) =>
+      getDailyMinutes(user.id!, 30).then(setDailyMins).catch(() => {})
+    )
+  }, [user?.id])
 
   const currentLevel = LEVELS[Math.min(level - 1, LEVELS.length - 1)]
   const nextLevel = LEVELS[Math.min(level, LEVELS.length - 1)]
@@ -24,6 +39,13 @@ export function Profile({ onLevelUp, onShare }: { onLevelUp: () => void; onShare
 
   const currentMonth = new Date().toLocaleString('pt-PT', { month: 'long' })
   const monthLabel = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)
+
+  // Gráfico real de 30 dias
+  const days30 = Array.from({ length: 30 }, (_, i) => localDay(Date.now() - (29 - i) * 86400000))
+  const values30 = days30.map((d) => dailyMins[d] ?? 0)
+  const maxVal = Math.max(...values30, 1)
+  const hasActivity = values30.some((v) => v > 0)
+  const avgMins = Math.round(values30.reduce((s, v) => s + v, 0) / 30)
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>
@@ -62,23 +84,40 @@ export function Profile({ onLevelUp, onShare }: { onLevelUp: () => void; onShare
         ))}
       </div>
 
-      {/* Chart */}
+      {/* Chart — dados reais de Dexie */}
       <div style={{ margin: '24px 20px 0', padding: 18, background: 'var(--bg2)', borderRadius: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 14 }}>
           <div style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 700, color: 'var(--text2)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Últimos 30 dias</div>
-          <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)' }}>média 34 min/dia</div>
+          <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)' }}>
+            {hasActivity ? `média ${avgMins} min/dia` : ''}
+          </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 60 }}>
-          {Array.from({ length: 30 }).map((_, i) => {
-            const h = 12 + Math.abs(Math.sin(i * 1.7)) * 42 + (i > 20 ? 8 : 0)
-            return <div key={i} style={{ flex: 1, height: h, background: i >= 23 ? 'var(--accent)' : 'var(--accent-soft)', borderRadius: 2 }} />
-          })}
+          {hasActivity
+            ? values30.map((v, i) => (
+                <div
+                  key={i}
+                  style={{
+                    flex: 1,
+                    height: v > 0 ? Math.max(4, Math.round((v / maxVal) * 54)) : 2,
+                    background: v > 0 ? 'var(--accent)' : 'var(--accent-soft)',
+                    borderRadius: 2,
+                    opacity: v > 0 ? 1 : 0.25,
+                  }}
+                />
+              ))
+            : (
+              <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text3)', height: '100%' }}>
+                Começa a ler para veres a tua atividade
+              </div>
+            )}
         </div>
       </div>
 
       {/* Shortcuts */}
       <div style={{ margin: '24px 20px 0', background: 'var(--bg2)', borderRadius: 16, overflow: 'hidden' }}>
         {[
+          { icon: 'bar-chart-2', label: 'Stats detalhados', action: () => navigate('/stats') },
           { icon: 'award', label: 'As minhas conquistas', action: onLevelUp },
           { icon: 'crown', label: 'A minha subscrição', action: () => navigate('/paywall') },
           { icon: 'share-2', label: `Partilhar o meu ${monthLabel}`, action: () => onShare('wrapped') },

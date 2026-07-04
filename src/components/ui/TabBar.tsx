@@ -10,7 +10,7 @@ const TABS = [
   { id: 'profile', label: 'Perfil', icon: 'user', path: '/profile' },
 ]
 
-const HIDE_ON = ['/', '/welcome', '/login', '/genres', '/paywall', '/checkout', '/processing', '/success', '/wrapped', '/requests']
+const HIDE_ON = ['/', '/welcome', '/login', '/genres', '/paywall', '/checkout', '/processing', '/success', '/wrapped', '/requests', '/stats']
 
 export function TabBar() {
   const navigate = useNavigate()

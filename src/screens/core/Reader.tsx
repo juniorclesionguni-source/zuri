@@ -4,7 +4,7 @@ import { Icon } from '../../components/ui/Icon'
 import { ReaderSettings } from './ReaderSettings'
 import { useCatalog } from '../../store/catalog'
 import { useAuthStore } from '../../store/auth'
-import { saveProgress, getProgress } from '../../data/db'
+import { saveProgress, getProgress, logSession } from '../../data/db'
 import { progress as progressApi } from '../../data/services'
 
 const THEMES: Record<string, { bg: string; text: string }> = {
@@ -27,6 +27,8 @@ export function Reader() {
   const containerRef = useRef<HTMLDivElement>(null)
   const renditionRef = useRef<any>(null)
   const epubRef = useRef<any>(null)
+  const startedAtRef = useRef(0)   // timestamp de início da sessão
+  const prevPctRef = useRef(0)     // pct anterior (para detectar cruzamento 95%)
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -69,6 +71,8 @@ export function Reader() {
       setLoading(false)
       return
     }
+
+    startedAtRef.current = Date.now()
 
     let destroyed = false
     let epubInstance: any
@@ -115,6 +119,7 @@ export function Reader() {
 
         // A1.6: retoma na posição guardada (Dexie)
         const saved = user?.id && id ? await getProgress(user.id, id) : null
+        prevPctRef.current = saved?.progressPct ?? 0
         await renditionInstance.display(saved?.lastCfi || undefined)
         if (destroyed) return
         setLoading(false)
@@ -140,6 +145,14 @@ export function Reader() {
     return () => {
       destroyed = true
       renditionInstance?.destroy()
+      // Regista sessão — fire-and-forget, não bloqueia o unmount
+      if (user?.id && id) {
+        const uid = user.id, bid = id, t0 = startedAtRef.current
+        void logSession(uid, bid, t0, Date.now()).catch(() => {})
+        void import('../../data/activity').then(({ updateAggregates }) =>
+          updateAggregates(uid).catch(() => {})
+        )
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [book?.epub_path, loaded])
@@ -149,9 +162,16 @@ export function Reader() {
     if (renditionRef.current) applyTheme(renditionRef.current, theme, fontSize, lineHeight, fontFamily)
   }, [theme, fontSize, lineHeight, fontFamily, applyTheme])
 
-  // save progress
+  // save progress + detecta livro terminado pela primeira vez
   useEffect(() => {
     if (!user?.id || !book?.id || prog === 0) return
+    const prev = prevPctRef.current
+    if (prog >= 95 && prev < 95 && prev > 0) {
+      void import('../../data/activity').then(({ incrementBooksRead }) =>
+        incrementBooksRead(user.id!).catch(() => {})
+      )
+    }
+    prevPctRef.current = prog
     saveProgress(user.id, book.id, prog)
     progressApi.sync(user.id, book.id, prog).catch(() => {})
   }, [prog, book?.id, user?.id])
