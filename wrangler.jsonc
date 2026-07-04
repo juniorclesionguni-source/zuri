@@ -2,16 +2,17 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "zuri",
   "compatibility_date": "2026-07-04",
-  "observability": {
-    "enabled": true
-  },
-  "assets": {
-    "not_found_handling": "single-page-application"
-  },
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  "routes": [
-    { "pattern": "zuribook.page/*", "zone_name": "zuribook.page" }
-  ]
+  "observability": {
+    "enabled": true
+  },
+  "build": {
+    "command": "npm run build"
+  },
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
 }
