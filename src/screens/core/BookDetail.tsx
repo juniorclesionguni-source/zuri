@@ -1,0 +1,102 @@
+import { useNavigate, useParams } from 'react-router-dom'
+import { BookCover } from '../../components/ui/BookCover'
+import { Chip } from '../../components/ui/Chip'
+import { BookCard } from '../../components/ui/BookCard'
+import { PrimaryButton, GhostButton } from '../../components/ui/Button'
+import { SectionHeader } from '../../components/ui/SectionHeader'
+import { Icon } from '../../components/ui/Icon'
+import { BOOKS } from '../../data/catalog'
+import { useSubStore } from '../../store/subscription'
+
+export function BookDetail() {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { status } = useSubStore()
+  const book = BOOKS.find((b) => b.id === id) ?? BOOKS[0]
+
+  const handleRead = () => {
+    if (status !== 'active') navigate('/paywall')
+    else navigate(`/reader/${book.id}`)
+  }
+
+  return (
+    <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 40 }}>
+      {/* Hero */}
+      <div style={{ position: 'relative', height: 440, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 60, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, var(--bg2) 0%, var(--bg) 80%)' }} />
+        <div style={{ position: 'absolute', top: 70, left: 20, right: 20, display: 'flex', justifyContent: 'space-between', zIndex: 2 }}>
+          <button onClick={() => navigate(-1)} style={{ width: 40, height: 40, borderRadius: 20, background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <Icon name="chevron-left" size={20} color="var(--text2)" strokeWidth={2} />
+          </button>
+          <button style={{ width: 40, height: 40, borderRadius: 20, background: 'var(--bg)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <Icon name="more" size={20} color="var(--text2)" strokeWidth={2} />
+          </button>
+        </div>
+        <div style={{ position: 'relative', marginTop: 30, zIndex: 1 }}>
+          <BookCover title={book.title} author={book.author.split(' ').slice(-1)[0]} w={160} h={240} />
+        </div>
+        <h1 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 26, color: 'var(--text)', margin: '22px 0 4px', textAlign: 'center', zIndex: 1, padding: '0 40px' }}>{book.title}</h1>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text2)', zIndex: 1 }}>{book.author}</div>
+      </div>
+
+      {/* Metadata */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 22, padding: '0 20px', marginBottom: 24 }}>
+        {[
+          { val: String(book.pages), label: 'páginas' },
+          { val: `${Math.round(book.mins / 60)}h`, label: 'leitura' },
+          { val: String(book.rating), label: 'rating', icon: true },
+        ].map((m, i) => (
+          <div key={m.label} style={{ display: 'flex', alignItems: 'center', gap: i > 0 ? 22 : 0 }}>
+            {i > 0 && <div style={{ width: 1, background: 'var(--border)', height: 32, alignSelf: 'center' }} />}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: 18, fontWeight: 500, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'center' }}>
+                {m.val} {m.icon && <Icon name="star" size={12} color="var(--accent)" strokeWidth={2} />}
+              </div>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 10, color: 'var(--text3)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{m.label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <PrimaryButton onClick={handleRead}>Começar a ler</PrimaryButton>
+        <GhostButton>+ Adicionar à biblioteca</GhostButton>
+      </div>
+
+      {/* Sobre */}
+      <div style={{ padding: '32px 20px 0' }}>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 700, color: 'var(--text3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Sobre este livro</div>
+        <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text2)', lineHeight: 1.6, margin: '12px 0 0' }}>
+          {book.synopsis ?? 'Um clássico da literatura lusófona.'}
+          {' '}<span style={{ color: 'var(--accent)', fontWeight: 600 }}>Ler mais</span>
+        </p>
+        <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+          <Chip>{book.genre}</Chip>
+          <Chip>Literatura Moçambicana</Chip>
+        </div>
+      </div>
+
+      {/* Autor */}
+      <div style={{ padding: '32px 20px 0' }}>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 700, color: 'var(--text3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Sobre o autor</div>
+        <div style={{ display: 'flex', gap: 14, marginTop: 14, alignItems: 'center' }}>
+          <div style={{ width: 56, height: 56, borderRadius: 28, background: 'var(--accent-soft)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 24, color: 'var(--accent)' }}>{book.author[0]}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 16, color: 'var(--text)' }}>{book.author}</div>
+            <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text3)', marginTop: 2, lineHeight: 1.4 }}>Autor moçambicano de referência na literatura lusófona.</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Relacionados */}
+      <div style={{ paddingTop: 32 }}>
+        <SectionHeader>Leitores também leram</SectionHeader>
+        <div className="hide-scrollbar" style={{ display: 'flex', gap: 14, overflowX: 'auto', padding: '0 20px' }}>
+          {BOOKS.filter((b) => b.id !== book.id).slice(0, 5).map((b) => (
+            <BookCard key={b.id} book={b} onClick={() => navigate(`/book/${b.id}`)} w={100} />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

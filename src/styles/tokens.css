@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #FEF8F5;
+  --bg2: #F5EDE6;
+  --bg3: #EDE3DA;
+  --accent: #C96A58;
+  --accent-dark: #9A4A3C;
+  --accent-soft: #F5E3D8;
+  --text: #3A2020;
+  --text2: #6B4A4A;
+  --text3: #9B8080;
+  --success: #4A7C4A;
+  --error: #A44A4A;
+  --warn: #C48A3A;
+  --border: rgba(58, 32, 32, 0.12);
+  --border-strong: rgba(58, 32, 32, 0.22);
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'Nunito', -apple-system, system-ui, sans-serif;
+  --reader: 'Lora', Georgia, serif;
+}
+
+[data-dark] {
+  --bg: #28231C;
+  --bg2: #38302A;
+  --bg3: #453A32;
+  --accent: #D8B880;
+  --accent-dark: #B89A60;
+  --accent-soft: rgba(216, 184, 128, 0.12);
+  --text: #EEE4D0;
+  --text2: #C4B8A0;
+  --text3: #8A806F;
+  --success: #8ABE8A;
+  --error: #D88A8A;
+  --warn: #E0B070;
+  --border: rgba(238, 228, 208, 0.14);
+  --border-strong: rgba(238, 228, 208, 0.28);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+}
+
+/* Página: fundo neutro atrás da moldura (só visível no desktop) */
+body { background: #1A1714; }
+
+/* App: coluna central com largura de telemóvel; 100% num telemóvel real */
+#root {
+  height: 100%;
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Elementos fixos confinam-se à coluna do #root (430px centrados no desktop) */
+.zuri-overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+}
+.zuri-bottombar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+}
+
+button { font-family: var(--sans); }
+
+/* Scrollbar hiding */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+@keyframes zspin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes zpop {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes zfade {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
