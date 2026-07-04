@@ -125,10 +125,10 @@ export function ShareModal({ initialKind = 'wrapped', onClose }: { initialKind?:
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}><Icon name="x" size={22} color="var(--text3)" strokeWidth={1.8} /></button>
         </div>
 
-        {/* preview escalado (só visual) */}
+        {/* preview escalado (só visual) — transform no FILHO, origem top-left (como as thumbs) */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16, flexShrink: 0 }}>
-          <div style={{ transform: 'scale(0.26)', transformOrigin: 'top center', height: `${1920 * 0.26}px`, width: `${1080 * 0.26}px`, overflow: 'hidden', borderRadius: 12, boxShadow: '0 8px 40px rgba(0,0,0,0.3)' }}>
-            <div style={{ width: 1080, height: 1920 }}>
+          <div style={{ width: `${1080 * 0.26}px`, height: `${1920 * 0.26}px`, overflow: 'hidden', borderRadius: 12, boxShadow: '0 8px 40px rgba(0,0,0,0.3)' }}>
+            <div style={{ transform: 'scale(0.26)', transformOrigin: 'top left', width: 1080, height: 1920 }}>
               <Component {...propsFor(kind)} />
             </div>
           </div>
