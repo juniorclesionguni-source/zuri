@@ -70,24 +70,14 @@ export function Reader() {
         renditionInstance = epubInstance.renderTo(containerRef.current!, {
           width: '100%',
           height: '100%',
-          spread: 'none',
-          flow: 'paginated',
+          flow: 'scrolled',        // leitura contínua: o livro inteiro rola verticalmente
+          manager: 'continuous',   // carrega os capítulos seguintes à medida que rolas
         })
         renditionRef.current = renditionInstance
 
-        // Zonas de toque DENTRO do iframe (cliques no iframe não sobem para o React):
-        // 30% esquerda = página anterior, 30% direita = seguinte, centro = alterna o chrome.
+        // Leitura por scroll — um toque no texto mostra/esconde a barra.
         renditionInstance.hooks.content.register((contents: any) => {
-          contents.document.addEventListener('click', (e: MouseEvent) => {
-            const w = contents.window.innerWidth
-            if (e.clientX < w * 0.3) renditionInstance.prev()
-            else if (e.clientX > w * 0.7) renditionInstance.next()
-            else setChromeVisible((v) => !v)
-          })
-        })
-        renditionInstance.on('keyup', (e: KeyboardEvent) => {
-          if (e.key === 'ArrowRight') renditionInstance.next()
-          else if (e.key === 'ArrowLeft') renditionInstance.prev()
+          contents.document.addEventListener('click', () => setChromeVisible((v) => !v))
         })
 
         applyTheme(renditionInstance, theme, fontSize, lineHeight, fontFamily)
