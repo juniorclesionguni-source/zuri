@@ -1,4 +1,5 @@
 import { supabase } from '../../lib/supabase'
+import { authHeaders } from './content'
 
 export async function getSubscription(userId: string): Promise<{ status: string; expiresAt: string | null } | null> {
   try {
@@ -14,6 +15,10 @@ export async function getSubscription(userId: string): Promise<{ status: string;
   }
 }
 
-export async function activateSimulated(): Promise<void> {
-  await supabase!.rpc('activate_own_subscription')
+// Activação SIMULADA via Edge Function (getUser + service_role). Token explícito
+// para garantir que o servidor identifica o utilizador. Devolve o novo estado.
+export async function activateSimulated(): Promise<{ status: string; expiresAt: string | null }> {
+  const { data, error } = await supabase!.functions.invoke('subscribe', { body: {}, headers: await authHeaders() })
+  if (error) throw error
+  return { status: (data?.status as string) ?? 'active', expiresAt: (data?.expiresAt as string | null) ?? null }
 }

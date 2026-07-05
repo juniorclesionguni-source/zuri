@@ -33,12 +33,10 @@ export const useSubStore = create<SubState>()(
         if (!row) return
         set({ status: calcStatus(row), expiresAt: row.expiresAt ? fmtDate(row.expiresAt) : null })
       },
-      activate: async (userId: string) => {
-        const api = await import('../data/api/subscription')
-        await api.activateSimulated()
-        const row = await api.getSubscription(userId)
-        if (!row) return
-        set({ status: calcStatus(row), expiresAt: row.expiresAt ? fmtDate(row.expiresAt) : null })
+      activate: async (_userId: string) => {
+        const { activateSimulated } = await import('../data/api/subscription')
+        const res = await activateSimulated() // servidor activa e devolve o novo estado
+        set({ status: calcStatus(res), expiresAt: res.expiresAt ? fmtDate(res.expiresAt) : null })
       },
     }),
     { name: 'zuri-sub' }
