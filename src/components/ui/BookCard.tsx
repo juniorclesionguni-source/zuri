@@ -7,13 +7,15 @@ interface BookCardProps {
   w?: number
   showProgress?: boolean
   progress?: number
+  /** Fluid: card fills its grid cell (width:100%) and cover scales via aspectRatio */
+  fluid?: boolean
 }
 
-export function BookCard({ book, onClick, w = 110, showProgress, progress = 0 }: BookCardProps) {
+export function BookCard({ book, onClick, w = 110, showProgress, progress = 0, fluid }: BookCardProps) {
   const h = w * 1.5
   return (
-    <div onClick={onClick} style={{ width: w, cursor: 'pointer', flexShrink: 0 }}>
-      <BookCover title={book.title} author={book.author.split(' ').slice(-1)[0]} genre={book.genre} coverUrl={book.cover_url} w={w} h={h} />
+    <div onClick={onClick} style={fluid ? { width: '100%', cursor: 'pointer' } : { width: w, cursor: 'pointer', flexShrink: 0 }}>
+      <BookCover title={book.title} author={book.author.split(' ').slice(-1)[0]} genre={book.genre} coverUrl={book.cover_url} w={fluid ? undefined : w} h={fluid ? undefined : h} fluid={fluid} />
       <div style={{
         fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 700, color: 'var(--text)',
         marginTop: 10, lineHeight: 1.3,

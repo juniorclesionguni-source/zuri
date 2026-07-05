@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useUIStore } from '../../store/ui'
 import { Icon } from './Icon'
 
-const TABS = [
+export const TABS = [
   { id: 'home', label: 'Home', icon: 'home', path: '/home' },
   { id: 'explore', label: 'Explorar', icon: 'compass', path: '/explore' },
   { id: 'reading', label: 'A ler', icon: 'book-open', path: '/reading' },
@@ -12,13 +12,16 @@ const TABS = [
 
 const HIDE_ON = ['/', '/welcome', '/login', '/genres', '/paywall', '/checkout', '/processing', '/success', '/wrapped', '/requests', '/stats', '/notifications']
 
+export function navHidden(pathname: string): boolean {
+  return HIDE_ON.some((p) => pathname === p) || pathname.startsWith('/reader') || pathname.startsWith('/book')
+}
+
 export function TabBar() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const dark = useUIStore((s) => s.dark)
 
-  const hidden = HIDE_ON.some((p) => pathname === p) || pathname.startsWith('/reader') || pathname.startsWith('/book')
-  if (hidden) return null
+  if (navHidden(pathname)) return null
 
   return (
     <div className="zuri-bottombar" style={{

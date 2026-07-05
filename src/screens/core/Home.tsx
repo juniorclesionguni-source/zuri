@@ -85,9 +85,9 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
       {/* Sugestões */}
       <div style={{ marginTop: 32 }}>
         <SectionHeader action="Ver tudo">Sugestões para ti</SectionHeader>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, padding: '0 20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 20, padding: '0 20px' }}>
           {books.slice(1, 5).map((b) => (
-            <BookCard key={b.id} book={b} onClick={() => navigate(`/book/${b.id}`)} w={150} />
+            <BookCard key={b.id} book={b} onClick={() => navigate(`/book/${b.id}`)} fluid />
           ))}
         </div>
       </div>

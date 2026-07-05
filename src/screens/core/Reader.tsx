@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useIsDesktop } from '../../hooks/useBreakpoint'
 import { Icon } from '../../components/ui/Icon'
 import { ReaderSettings } from './ReaderSettings'
 import { useCatalog } from '../../store/catalog'
@@ -179,6 +180,7 @@ export function Reader() {
   }, [prog, book?.id, user?.id])
 
   const { bg } = THEMES[theme] ?? THEMES['sépia']
+  const isDesktop = useIsDesktop()
 
   // Setas do teclado quando o foco está fora do iframe (desktop).
   useEffect(() => {
@@ -211,8 +213,8 @@ export function Reader() {
         </div>
       )}
 
-      {/* epubjs container */}
-      <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+      {/* epubjs container — largura limitada no desktop para legibilidade */}
+      <div ref={containerRef} style={{ width: '100%', height: '100%', ...(isDesktop ? { maxWidth: 720, margin: '0 auto' } : {}) }} />
 
       {/* Top chrome */}
       <div style={{

@@ -78,13 +78,13 @@ export function Library() {
           <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text3)', marginTop: 16 }}>{EMPTY[tab]}</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, padding: '0 20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 20, padding: '0 20px' }}>
           {list.map((b) => (
             <BookCard
               key={b.id}
               book={b}
               onClick={() => navigate(`/book/${b.id}`)}
-              w={150}
+              fluid
               showProgress={tab === 'A ler'}
               progress={progress[b.id]?.pct ?? 0}
             />

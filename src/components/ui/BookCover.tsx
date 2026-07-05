@@ -23,16 +23,21 @@ function palette(genre: string, title: string): [string, string, string] {
 }
 
 // Deterministic decoration per book: circles, lines, dots
-function Deco({ w, h, p, seed }: { w: number; h: number; p: [string, string, string]; seed: number }) {
+// fluid=true: SVG fills its container via viewBox (used in fluid book covers)
+function Deco({ w, h, p, seed, fluid }: { w: number; h: number; p: [string, string, string]; seed: number; fluid?: boolean }) {
   const s = seed % 4
+  const svgW: string | number = fluid ? '100%' : w
+  const svgH: string | number = fluid ? '100%' : h
+  const vb = fluid ? `0 0 ${w} ${h}` : undefined
+  const base = { style: { position: 'absolute' as const, inset: 0 }, viewBox: vb, 'aria-hidden': true }
   if (s === 0) return (
-    <svg width={w} height={h} style={{ position: 'absolute', inset: 0 }} aria-hidden>
+    <svg width={svgW} height={svgH} {...base}>
       <circle cx={w * 0.8} cy={h * 0.25} r={w * 0.35} fill={p[2]} fillOpacity="0.07" />
       <circle cx={w * 0.15} cy={h * 0.7} r={w * 0.2} fill={p[2]} fillOpacity="0.05" />
     </svg>
   )
   if (s === 1) return (
-    <svg width={w} height={h} style={{ position: 'absolute', inset: 0 }} aria-hidden>
+    <svg width={svgW} height={svgH} {...base}>
       <line x1={w * 0.1} y1={h * 0.12} x2={w * 0.9} y2={h * 0.12} stroke={p[2]} strokeOpacity="0.2" strokeWidth="0.5" />
       <line x1={w * 0.1} y1={h * 0.16} x2={w * 0.9} y2={h * 0.16} stroke={p[2]} strokeOpacity="0.1" strokeWidth="0.5" />
       <circle cx={w * 0.5} cy={h * 0.42} r={w * 0.22} fill="none" stroke={p[2]} strokeOpacity="0.12" strokeWidth="0.8" />
@@ -41,12 +46,12 @@ function Deco({ w, h, p, seed }: { w: number; h: number; p: [string, string, str
     </svg>
   )
   if (s === 2) return (
-    <svg width={w} height={h} style={{ position: 'absolute', inset: 0 }} aria-hidden>
+    <svg width={svgW} height={svgH} {...base}>
       <polygon points={`${w*0.5},${h*0.1} ${w*0.85},${h*0.5} ${w*0.5},${h*0.9} ${w*0.15},${h*0.5}`} fill="none" stroke={p[2]} strokeOpacity="0.1" strokeWidth="0.8" />
     </svg>
   )
   return (
-    <svg width={w} height={h} style={{ position: 'absolute', inset: 0 }} aria-hidden>
+    <svg width={svgW} height={svgH} {...base}>
       {[0.2, 0.35, 0.5, 0.65, 0.8].map((x, i) => (
         <circle key={i} cx={w * x} cy={h * 0.15} r={1.5} fill={p[2]} fillOpacity="0.3" />
       ))}
@@ -62,16 +67,21 @@ interface BookCoverProps {
   coverUrl?: string
   w?: number
   h?: number
+  /** Fluid: fills parent width at 2:3 aspect ratio — for grid cells. Does not use w/h for sizing. */
+  fluid?: boolean
 }
 
-export function BookCover({ title, author, genre = '', coverUrl, w = 100, h = 150 }: BookCoverProps) {
+export function BookCover({ title, author, genre = '', coverUrl, w = 100, h = 150, fluid }: BookCoverProps) {
   const [imgFailed, setImgFailed] = useState(false)
   const p = palette(genre, title)
   const seed = title.charCodeAt(0) + title.length
 
   if (coverUrl && !imgFailed) {
+    const box = fluid
+      ? { width: '100%', aspectRatio: '2/3', height: undefined as undefined }
+      : { width: w, height: h }
     return (
-      <div style={{ width: w, height: h, borderRadius: 4, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.22), inset -2px 0 4px rgba(0,0,0,0.18)' }}>
+      <div style={{ ...box, borderRadius: 4, overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 8px rgba(0,0,0,0.22), inset -2px 0 4px rgba(0,0,0,0.18)' }}>
         <img
           src={coverUrl}
           alt={title}
@@ -83,12 +93,16 @@ export function BookCover({ title, author, genre = '', coverUrl, w = 100, h = 15
     )
   }
 
-  const fontSize = Math.max(9, Math.min(w * 0.12, 15))
-  const authorSize = Math.max(7, fontSize * 0.58)
+  // ponytail: fluid fallback uses fixed font sizes — rare path, most books have a real cover
+  const fontSize = fluid ? 14 : Math.max(9, Math.min(w * 0.12, 15))
+  const authorSize = fluid ? 9 : Math.max(7, fontSize * 0.58)
+  const box = fluid
+    ? { width: '100%', aspectRatio: '2/3', height: undefined as undefined }
+    : { width: w, height: h }
 
   return (
     <div style={{
-      width: w, height: h,
+      ...box,
       background: `linear-gradient(150deg, ${p[0]} 0%, ${p[1]} 100%)`,
       borderRadius: 4,
       position: 'relative',
@@ -100,7 +114,7 @@ export function BookCover({ title, author, genre = '', coverUrl, w = 100, h = 15
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 25% 15%, rgba(255,255,255,0.07), transparent 55%)' }} />
 
       {/* decorative pattern */}
-      <Deco w={w} h={h} p={p} seed={seed} />
+      <Deco w={w} h={h} p={p} seed={seed} fluid={fluid} />
 
       {/* spine shadow */}
       <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: 'linear-gradient(to right, rgba(0,0,0,0.3), transparent)' }} />
@@ -108,7 +122,7 @@ export function BookCover({ title, author, genre = '', coverUrl, w = 100, h = 15
       {/* genre label */}
       {genre && (
         <div style={{
-          position: 'absolute', top: h * 0.08, left: w * 0.1, right: w * 0.1,
+          position: 'absolute', top: '8%', left: '10%', right: '10%',
           fontFamily: "'Nunito', sans-serif",
           fontSize: Math.max(6, authorSize * 0.82),
           fontWeight: 700,

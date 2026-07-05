@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useBreakpoint } from './hooks/useBreakpoint'
 import { useUIStore } from './store/ui'
 import { useAuthStore } from './store/auth'
 import { useCatalog } from './store/catalog'
@@ -26,7 +27,8 @@ import { Success } from './screens/paywall/Success'
 import { Wrapped } from './screens/social/Wrapped'
 import { Requests } from './screens/social/Requests'
 import { LevelUpModal } from './screens/social/LevelUpModal'
-import { TabBar } from './components/ui/TabBar'
+import { TabBar, navHidden } from './components/ui/TabBar'
+import { Sidebar } from './components/ui/Sidebar'
 import { InstallPrompt } from './components/InstallPrompt'
 
 // Lazy: html2canvas (~200 KB) e os 5 share cards só carregam quando o utilizador abre partilha
@@ -48,41 +50,49 @@ function Spinner() {
 function AppShell() {
   const [shareKind, setShareKind] = useState<string | null>(null)
   const [levelUp, setLevelUp] = useState(false)
+  const breakpoint = useBreakpoint()
+  const { pathname } = useLocation()
+  const showSidebar = breakpoint !== 'mobile' && !navHidden(pathname)
 
   return (
     <>
-      <Suspense fallback={<Spinner />}>
-        <Routes>
-          <Route path="/" element={<Splash />} />
-          <Route path="/welcome" element={<Welcome />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/genres" element={<Genres />} />
+      <div style={{ display: breakpoint === 'mobile' ? 'block' : 'flex', height: '100%' }}>
+        {showSidebar && <Sidebar />}
+        <main style={{ flex: 1, height: '100%', position: 'relative', overflow: 'hidden' }}>
+          <Suspense fallback={<Spinner />}>
+            <Routes>
+              <Route path="/" element={<Splash />} />
+              <Route path="/welcome" element={<Welcome />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/genres" element={<Genres />} />
 
-          <Route path="/home"    element={<Home onShare={setShareKind} />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/reading" element={<Reading onShare={setShareKind} />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/profile" element={<Profile onLevelUp={() => setLevelUp(true)} onShare={setShareKind} />} />
+              <Route path="/home"    element={<Home onShare={setShareKind} />} />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/reading" element={<Reading onShare={setShareKind} />} />
+              <Route path="/library" element={<Library />} />
+              <Route path="/profile" element={<Profile onLevelUp={() => setLevelUp(true)} onShare={setShareKind} />} />
 
-          <Route path="/book/:id"   element={<BookDetail />} />
-          <Route path="/reader/:id" element={<Reader />} />
+              <Route path="/book/:id"   element={<BookDetail />} />
+              <Route path="/reader/:id" element={<Reader />} />
 
-          <Route path="/paywall"    element={<Paywall />} />
-          <Route path="/checkout"   element={<Checkout />} />
-          <Route path="/processing" element={<Processing />} />
-          <Route path="/success"    element={<Success />} />
+              <Route path="/paywall"    element={<Paywall />} />
+              <Route path="/checkout"   element={<Checkout />} />
+              <Route path="/processing" element={<Processing />} />
+              <Route path="/success"    element={<Success />} />
 
-          <Route path="/stats"         element={<StatsDetail />} />
-          <Route path="/notifications" element={<Notifications />} />
+              <Route path="/stats"         element={<StatsDetail />} />
+              <Route path="/notifications" element={<Notifications />} />
 
-          <Route path="/wrapped"  element={<Wrapped onShare={setShareKind} />} />
-          <Route path="/requests" element={<Requests />} />
+              <Route path="/wrapped"  element={<Wrapped onShare={setShareKind} />} />
+              <Route path="/requests" element={<Requests />} />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </main>
+      </div>
 
-      <TabBar />
+      {breakpoint === 'mobile' && <TabBar />}
       <InstallPrompt />
 
       {shareKind && (

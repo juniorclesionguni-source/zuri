@@ -50,15 +50,13 @@ html, body {
   overscroll-behavior: none;
 }
 
-/* Página: fundo neutro atrás da moldura (só visível no desktop) */
-body { background: #1A1714; }
+/* Página: fundo igual ao app (moldura já não faz sentido no layout responsivo) */
+body { background: var(--bg); }
 
-/* App: coluna central com largura de telemóvel; 100% num telemóvel real */
+/* App: preenche o viewport; sidebar + conteúdo no desktop */
 #root {
   height: 100%;
   width: 100%;
-  max-width: 430px;
-  margin: 0 auto;
   position: relative;
   overflow: hidden;
   background: var(--bg);
