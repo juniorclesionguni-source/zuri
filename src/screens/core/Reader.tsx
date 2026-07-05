@@ -82,9 +82,16 @@ export function Reader() {
     ;(async () => {
       try {
         const ePub = (await import('epubjs')).default
-        // Se o livro foi descarregado, abre do blob local (funciona offline); senão do URL.
+        // Descarregado → lê do blob local (offline). Senão → pede URL assinado (exige subscrição).
         const offline = id ? await getOfflineBook(id) : undefined
-        epubInstance = ePub(offline?.data ?? book!.epub_path!)
+        let source: ArrayBuffer | string
+        if (offline?.data) {
+          source = offline.data
+        } else {
+          const { getBookUrl } = await import('../../data/api/content')
+          source = await getBookUrl(id!)
+        }
+        epubInstance = ePub(source)
         epubRef.current = epubInstance
 
         renditionInstance = epubInstance.renderTo(containerRef.current!, {
