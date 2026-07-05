@@ -56,10 +56,8 @@ export function BookDetail() {
     if (!book.epub_path || dlPct !== null) return
     setDlPct(0)
     try {
-      const { getBookUrl } = await import('../../data/api/content')
-      const url = await getBookUrl(book.id) // URL assinado (exige subscrição)
-      await downloadBook(book.id, url, (p) => setDlPct(p))
-    } catch { /* falha silenciosa (ex.: sem subscrição) */ }
+      await downloadBook(book.id, book.epub_path, (p) => setDlPct(p))
+    } catch { /* falha silenciosa */ }
     finally { setDlPct(null) }
   }
 

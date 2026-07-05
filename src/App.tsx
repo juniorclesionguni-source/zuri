@@ -7,7 +7,6 @@ import { useCatalog } from './store/catalog'
 import { useStatsStore } from './store/stats'
 import { useLibrary } from './store/library'
 import { useNotifications } from './store/notifications'
-import { useSubStore } from './store/subscription'
 import { isSupabaseConfigured } from './lib/supabaseConfig'
 import { auth } from './data/services'
 
@@ -138,12 +137,11 @@ export default function App() {
     useLibrary.getState().loadDownloads()
   }, [])
 
-  // Stats, notificações e subscrição: carregam do servidor quando o utilizador faz login.
+  // Stats e notificações: carregam do servidor quando o utilizador faz login.
   useEffect(() => {
     if (user?.id) {
       useStatsStore.getState().load(user.id)
       useNotifications.getState().load(user.id)
-      useSubStore.getState().load(user.id)
     }
   }, [user?.id])
 

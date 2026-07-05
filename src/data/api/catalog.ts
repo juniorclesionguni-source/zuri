@@ -19,8 +19,7 @@ export async function fetchBooks(): Promise<Book[]> {
     rating: Number(row.rating),
     mins: row.mins as number,
     synopsis: row.synopsis as string | undefined,
-    // Apenas o nome do ficheiro (não o URL público) — o acesso é via URL assinado.
-    epub_path: (row.epub_path as string | null) ?? undefined,
+    epub_path: row.epub_path ? `${R2}/${row.epub_path}` : undefined,
     cover_url: row.cover_path ? `${R2}/${row.cover_path}` : undefined,
   } satisfies Book))
 }
