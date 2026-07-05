@@ -88,8 +88,14 @@ export function Reader() {
         if (offline?.data) {
           source = offline.data
         } else {
-          const { getBookUrl } = await import('../../data/api/content')
-          source = await getBookUrl(id!)
+          try {
+            const { getBookUrl } = await import('../../data/api/content')
+            source = await getBookUrl(id!)
+          } catch {
+            // Sem acesso (tipicamente sem subscrição activa) → encaminha para subscrever.
+            if (!destroyed) navigate('/paywall')
+            return
+          }
         }
         epubInstance = ePub(source)
         epubRef.current = epubInstance
