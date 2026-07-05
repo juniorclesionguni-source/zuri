@@ -58,7 +58,7 @@ export function BookDetail() {
           </button>
         </div>
         <div style={{ position: 'relative', marginTop: 30, zIndex: 1 }}>
-          <BookCover title={book.title} author={book.author.split(' ').slice(-1)[0]} w={160} h={240} />
+          <BookCover title={book.title} author={book.author.split(' ').slice(-1)[0]} coverUrl={book.cover_url} w={160} h={240} />
         </div>
         <h1 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 26, color: 'var(--text)', margin: '22px 0 4px', textAlign: 'center', zIndex: 1, padding: '0 40px' }}>{book.title}</h1>
         <div style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text2)', zIndex: 1 }}>{book.author}</div>

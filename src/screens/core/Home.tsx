@@ -63,7 +63,7 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
             onClick={() => navigate(`/book/${progressBook.id}`)}
             style={{ display: 'flex', gap: 14, background: 'var(--bg2)', borderRadius: 14, padding: 12, alignItems: 'center', minWidth: 300, cursor: 'pointer' }}
           >
-            <BookCover title={progressBook.title} author={progressBook.author.split(' ').slice(-1)[0]} w={56} h={84} />
+            <BookCover title={progressBook.title} author={progressBook.author.split(' ').slice(-1)[0]} coverUrl={progressBook.cover_url} w={56} h={84} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{progressBook.title}</div>
               <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text3)', marginTop: 2 }}>{progressBook.author}</div>

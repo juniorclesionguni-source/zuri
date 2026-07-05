@@ -55,7 +55,7 @@ export function Reading({ onShare }: { onShare: (kind: string) => void }) {
                   onClick={() => navigate(`/reader/${b.id}`)}
                   style={{ display: 'flex', gap: 14, background: 'var(--bg2)', borderRadius: 14, padding: 12, alignItems: 'center', cursor: 'pointer' }}
                 >
-                  <BookCover title={b.title} author={b.author.split(' ').slice(-1)[0]} w={64} h={96} />
+                  <BookCover title={b.title} author={b.author.split(' ').slice(-1)[0]} coverUrl={b.cover_url} w={64} h={96} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.title}</div>
                     <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text3)', marginTop: 2 }}>{b.author}</div>
