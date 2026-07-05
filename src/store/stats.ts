@@ -34,6 +34,14 @@ export const useStatsStore = create<StatsState>()(
             void import('../data/api/stats').then(({ saveStats }) =>
               saveStats(uid, { xp: newXP, level: newLevel }).catch(() => {})
             )
+            if (newLevel > s.level) {
+              void (async () => {
+                const { createNotification } = await import('../data/api/notifications')
+                await createNotification(uid, 'levelup', `Subiste ao nível ${newLevel}! 🎉`, 'Parabéns! Continua a ler para o próximo nível.').catch(() => {})
+                const { useNotifications } = await import('./notifications')
+                useNotifications.getState().load(uid)
+              })()
+            }
           }
           return { xp: newXP, level: newLevel }
         }),

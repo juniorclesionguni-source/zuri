@@ -5,6 +5,7 @@ import { useAuthStore } from './store/auth'
 import { useCatalog } from './store/catalog'
 import { useStatsStore } from './store/stats'
 import { useLibrary } from './store/library'
+import { useNotifications } from './store/notifications'
 import { isSupabaseConfigured } from './lib/supabaseConfig'
 import { auth } from './data/services'
 
@@ -34,6 +35,7 @@ const ShareModal = lazy(() => import('./screens/social/ShareModal').then((m) => 
 const Reader = lazy(() => import('./screens/core/Reader').then((m) => ({ default: m.Reader })))
 // Lazy: StatsDetail é uma rota secundária, não precisa de estar no bundle inicial
 const StatsDetail = lazy(() => import('./screens/core/StatsDetail').then((m) => ({ default: m.StatsDetail })))
+const Notifications = lazy(() => import('./screens/social/Notifications').then((m) => ({ default: m.Notifications })))
 
 function Spinner() {
   return (
@@ -70,7 +72,8 @@ function AppShell() {
           <Route path="/processing" element={<Processing />} />
           <Route path="/success"    element={<Success />} />
 
-          <Route path="/stats"    element={<StatsDetail />} />
+          <Route path="/stats"         element={<StatsDetail />} />
+          <Route path="/notifications" element={<Notifications />} />
 
           <Route path="/wrapped"  element={<Wrapped onShare={setShareKind} />} />
           <Route path="/requests" element={<Requests />} />
@@ -124,9 +127,12 @@ export default function App() {
     useLibrary.getState().loadDownloads()
   }, [])
 
-  // Stats: carrega do servidor quando o utilizador faz login.
+  // Stats + notificações: carregam do servidor quando o utilizador faz login.
   useEffect(() => {
-    if (user?.id) useStatsStore.getState().load(user.id)
+    if (user?.id) {
+      useStatsStore.getState().load(user.id)
+      useNotifications.getState().load(user.id)
+    }
   }, [user?.id])
 
   // Progresso e favoritos: carrega quando o utilizador faz login.
