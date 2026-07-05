@@ -1,0 +1,12 @@
+update public.books set cover_path = 'covers/a-ex.jpg' where epub_path = 'a-ex.epub';
+update public.books set cover_path = 'covers/a-pessoa-certa-e-voce.jpg' where epub_path = 'a-pessoa-certa-e-voce.epub';
+update public.books set cover_path = 'covers/alem-da-tempestade.jpg' where epub_path = 'alem-da-tempestade.epub';
+update public.books set cover_path = 'covers/nao-comecou-com-voce.jpg' where epub_path = 'nao-comecou-com-voce.epub';
+update public.books set cover_path = 'covers/ninguem-nasce-sabendo.png' where epub_path = 'ninguem-nasce-sabendo.epub';
+update public.books set cover_path = 'covers/no-rastro-da-mentira.jpg' where epub_path = 'no-rastro-da-mentira.epub';
+update public.books set cover_path = 'covers/nos-ja-moramos-aqui.jpg' where epub_path = 'nos-ja-moramos-aqui.epub';
+update public.books set cover_path = 'covers/o-diabo-veste-cor-de-rosa.jpg' where epub_path = 'o-diabo-veste-cor-de-rosa.epub';
+update public.books set cover_path = 'covers/por-que-as-mulheres-amam-os-homens-fortes.jpg' where epub_path = 'por-que-as-mulheres-amam-os-homens-fortes.epub';
+update public.books set cover_path = 'covers/por-que-ninguem-me-disse-isso-a.jpg' where epub_path = 'por-que-ninguem-me-disse-isso-a.epub';
+update public.books set cover_path = 'covers/um-crush-dos-infernos.jpg' where epub_path = 'um-crush-dos-infernos.epub';
+update public.books set cover_path = 'covers/um-namorado-bom-pra-cachorro.jpg' where epub_path = 'um-namorado-bom-pra-cachorro.epub';
