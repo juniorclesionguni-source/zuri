@@ -9,6 +9,7 @@ import { useAuthStore } from '../../store/auth'
 import { useCatalog } from '../../store/catalog'
 import { useLibrary } from '../../store/library'
 import { useNotifications } from '../../store/notifications'
+import { useUIStore } from '../../store/ui'
 
 export function Home({ onShare }: { onShare: (kind: string) => void }) {
   const navigate = useNavigate()
@@ -16,6 +17,8 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
   const books = useCatalog((s) => s.books)
   const progress = useLibrary((s) => s.progress)
   const unread = useNotifications((s) => s.unread)
+  const dark = useUIStore((s) => s.dark)
+  const toggleDark = useUIStore((s) => s.toggleDark)
   const name = user?.name?.split(' ')[0] ?? 'Leitor'
   const h = new Date().getHours()
   const greeting = h < 12 ? 'Bom dia' : h < 19 ? 'Boa tarde' : 'Boa noite'
@@ -36,9 +39,14 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
           <h1 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 28, color: 'var(--text)', margin: 0, lineHeight: 1.15 }}>{greeting},<br/>{name}</h1>
           <p style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--text3)', margin: '6px 0 0' }}>O que vais ler hoje?</p>
         </div>
-        <div onClick={() => navigate('/notifications')} style={{ position: 'relative', flexShrink: 0, paddingTop: 6, cursor: 'pointer' }}>
-          <Icon name="bell" size={22} color="var(--text2)" strokeWidth={1.5} />
-          {unread > 0 && <div style={{ position: 'absolute', top: 4, right: -2, minWidth: 8, height: 8, borderRadius: 4, background: 'var(--accent)' }} />}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0, paddingTop: 6 }}>
+          <div onClick={toggleDark} style={{ cursor: 'pointer' }} title={dark ? 'Modo claro' : 'Modo escuro'}>
+            <Icon name={dark ? 'sun' : 'moon'} size={22} color="var(--text2)" strokeWidth={1.5} />
+          </div>
+          <div onClick={() => navigate('/notifications')} style={{ position: 'relative', cursor: 'pointer' }}>
+            <Icon name="bell" size={22} color="var(--text2)" strokeWidth={1.5} />
+            {unread > 0 && <div style={{ position: 'absolute', top: -2, right: -2, minWidth: 8, height: 8, borderRadius: 4, background: 'var(--accent)' }} />}
+          </div>
         </div>
       </div>
 
