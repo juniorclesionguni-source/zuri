@@ -1,59 +1,74 @@
 # Zuri — Relatório Técnico
-### Leitura digital por subscrição (PWA) para o mercado moçambicano
+### Leitura digital por subscrição (*Progressive Web App*) para o mercado moçambicano
 
 > **Grupo:** _[nomes dos 6 membros]_ · **Cadeira:** _[disciplina]_ · **Data:** Julho 2026
-> **App em produção:** https://zuribook.page · **Repositório:** _[link]_
-
-**Legenda de estado** (usar na apresentação para ser honesto sobre o âmbito):
-`✅ Implementado e em produção` · `⚠️ MVP / simplificado` · `🔷 Desenhado, por implementar`
+> **Aplicação:** https://zuribook.page · **Repositório:** _[link]_
 
 ---
 
-## Divisão da apresentação (6 pessoas)
+## Resumo
 
-| # | Apresentador | Secções | Tempo sugerido |
+O Zuri é uma aplicação de leitura digital por subscrição, concebida para o contexto
+moçambicano — redes móveis dispendiosas, dispositivos modestos e pagamento por M-Pesa.
+Foi desenvolvida como *Progressive Web App* (PWA): um único código, instalável em
+telemóvel, *tablet* e computador portátil, sem recurso a lojas de aplicações. Este
+relatório descreve o processo de *design*, a arquitectura do sistema, o modelo de dados,
+os subsistemas de pagamento, protecção de conteúdo, funcionamento *offline*, gamificação
+e partilha, bem como a infraestrutura de suporte.
+
+---
+
+## Distribuição da apresentação (6 elementos)
+
+| # | Apresentador | Secções | Tempo |
 |---|---|---|---|
-| 1 | _[Pessoa 1]_ | 0. Design (Figma) · 1. Visão geral | ~5 min |
-| 2 | _[Pessoa 2]_ | 2. Arquitectura · Zero-Trust | ~5 min |
-| 3 | _[Pessoa 3]_ | 3. Modelo de dados · RLS | ~5 min |
-| 4 | _[Pessoa 4]_ | 4. Pagamentos M-Pesa · Subscrição | ~5 min |
-| 5 | _[Pessoa 5]_ | 5. Conteúdo/DRM · 6. Offline & Sync | ~5 min |
-| 6 | _[Pessoa 6]_ | 7. Gamificação · 8. Partilha · 9. Infra · 10. Roadmap | ~6 min |
+| 1 | _[Elemento 1]_ | 0. *Design* (Figma) · 1. Visão geral | ~5 min |
+| 2 | _[Elemento 2]_ | 2. Arquitectura e *Zero-Trust* | ~5 min |
+| 3 | _[Elemento 3]_ | 3. Modelo de dados e segurança de acesso | ~5 min |
+| 4 | _[Elemento 4]_ | 4. Pagamentos M-Pesa e subscrição | ~5 min |
+| 5 | _[Elemento 5]_ | 5. Conteúdo e protecção · 6. *Offline* e sincronização | ~6 min |
+| 6 | _[Elemento 6]_ | 7. Gamificação · 8. Partilha · 9. Infraestrutura | ~6 min |
 
 ---
 
 ## Índice
-0. [Design (Figma)](#0-design-figma)
-1. [Visão geral — princípios & NFRs](#1-visão-geral)
-2. [Arquitectura — 4 camadas & Zero-Trust](#2-arquitectura)
-3. [Modelo de dados — ER, SQL & RLS](#3-modelo-de-dados)
-4. [Pagamentos M-Pesa](#4-pagamentos-m-pesa)
-5. [Conteúdo & Acesso (DRM leve)](#5-conteúdo--acesso)
-6. [Offline & Sincronização](#6-offline--sincronização)
+0. [Processo de *design* (Figma)](#0-processo-de-design-figma)
+1. [Visão geral — princípios e requisitos](#1-visão-geral)
+2. [Arquitectura do sistema](#2-arquitectura-do-sistema)
+3. [Modelo de dados e segurança de acesso](#3-modelo-de-dados-e-segurança-de-acesso)
+4. [Pagamentos M-Pesa e subscrição](#4-pagamentos-m-pesa-e-subscrição)
+5. [Conteúdo e protecção](#5-conteúdo-e-protecção)
+6. [Funcionamento *offline* e sincronização](#6-funcionamento-offline-e-sincronização)
 7. [Gamificação](#7-gamificação)
-8. [Partilha viral](#8-partilha-viral)
+8. [Partilha](#8-partilha)
 9. [Infraestrutura](#9-infraestrutura)
-10. [Roadmap técnico & ADRs](#10-roadmap-técnico--adrs)
-- [Apêndice — lista de diagramas & screenshots](#apêndice)
+- [Apêndice — figuras e capturas de ecrã](#apêndice)
 
 ---
 
-## 0. Design (Figma)
+## 0. Processo de *design* (Figma)
 
-**Processo de design** (mostrar a evolução):
-1. **Pesquisa** — leitores moçambicanos, restrições (dados caros, telemóveis modestos, pagamento por M-Pesa).
-2. **Wireframes** de baixa fidelidade — fluxos principais (onboarding, catálogo, leitor, paywall).
-3. **Design system** — tokens de cor, tipografia, componentes.
-4. **Alta fidelidade** — ecrãs finais no Figma.
-5. **Protótipo interativo** — navegação clicável para testes.
-6. **Handoff** — do Figma para código (tokens → CSS variables).
+O desenvolvimento foi precedido de uma fase de concepção visual e de interacção,
+conduzida no Figma, com as seguintes etapas:
 
-**Design system implementado** (`src/styles/tokens.css`):
-- **Cor de marca:** `#C96A58` (terracota) · fundos, texto e bordas via *CSS variables* (tema claro/escuro).
-- **Tipografia:** Playfair Display (títulos, serifa itálica), Nunito (interface), Lora (leitor).
-- **Componentes reutilizáveis:** `BookCover`, `BookCard`, `Button`, `Chip`, `BottomSheet`, `TabBar`/`Sidebar`, `Icon`.
+1. **Investigação** — caracterização do público-alvo (leitores moçambicanos) e das
+   restrições do contexto (custo dos dados móveis, capacidade dos dispositivos, meio de
+   pagamento predominante).
+2. **Esquiços de baixa fidelidade** (*wireframes*) — definição dos fluxos principais:
+   integração inicial (*onboarding*), catálogo, leitor e subscrição.
+3. **Sistema de *design*** — definição de fichas de estilo (*design tokens*): paleta
+   cromática, tipografia e biblioteca de componentes reutilizáveis.
+4. **Protótipos de alta fidelidade** — desenho final dos ecrãs.
+5. **Protótipo interativo** — ligação navegável entre ecrãs para validação com utilizadores.
+6. **Transferência para desenvolvimento** (*handoff*) — as fichas de estilo do Figma foram
+   traduzidas directamente em variáveis de estilo da aplicação, garantindo fidelidade
+   entre o desenho e a implementação.
 
-> 📊 **Diagrama:** *User-flow* (fluxograma dos ecrãs) — ver Mermaid abaixo.
+O sistema de *design* assenta numa cor de marca terracota, num tema duplo (claro e escuro)
+gerido por variáveis de estilo, e numa tipografia que combina uma serifa expressiva para
+títulos, uma sem-serifa legível para a interface e uma serifa de leitura para o corpo do livro.
+
+**Figura 1 — Fluxo de navegação entre ecrãs** (*user-flow*):
 
 ```mermaid
 flowchart LR
@@ -66,437 +81,401 @@ flowchart LR
   Explore --> Requests
 ```
 
-> 📸 **Screenshots a incluir:**
-> - Board de *wireframes* (Figma)
-> - Board do *design system* (paleta + tipografia + componentes)
-> - 3–4 ecrãs de **alta fidelidade** (Figma)
-> - **Lado a lado**: mockup Figma **vs** app real (prova de fidelidade do handoff)
+*Capturas sugeridas:* painel de *wireframes*; painel do sistema de *design* (paleta,
+tipografia, componentes); ecrãs de alta fidelidade; comparação lado a lado entre o
+protótipo Figma e a aplicação final.
 
 ---
 
 ## 1. Visão geral
 
-**Princípios de engenharia**
+**Princípios orientadores**
 
-| Princípio | O que significa no Zuri |
+| Princípio | Aplicação no Zuri |
 |---|---|
-| **Zero-Trust** | O cliente nunca é confiável. A autorização é por linha na base de dados (RLS); a activação de subscrição só acontece no servidor. |
-| **Offline-first** | Ler sem rede. O estado local (IndexedDB) é a primeira fonte; o servidor sincroniza. |
-| **Custo baixo** | *Free-tiers permanentes* (não créditos que expiram). Grátis até ~10k utilizadores. |
-| **DRM leve** 🔷 | Proteger o conteúdo sem fricção: acesso ao EPUB só após verificação de subscrição (URL assinado de curta duração). |
-| **PWA-first** | Um só código, instalável em telemóvel/tablet/laptop, sem app store, actualização instantânea. |
+| **Zero-Trust** | O cliente nunca é considerado de confiança. A autorização é aplicada ao nível de cada registo na base de dados, e as operações sensíveis são exclusivas do servidor. |
+| **Offline-first** | A leitura não depende de ligação permanente. O estado local é a primeira fonte de verdade; o servidor sincroniza quando há rede. |
+| **Custo sustentável** | A fundação assenta em escalões gratuitos permanentes, evitando dependências de créditos temporários. |
+| **Protecção do conteúdo** | O acesso ao ficheiro do livro é mediado por verificação de subscrição, sem introduzir fricção para o leitor legítimo. |
+| **PWA-first** | Um só código, instalável e actualizável instantaneamente, sem intermediação de lojas de aplicações. |
 
-**Requisitos não-funcionais (NFRs)**
+**Requisitos não-funcionais**
 
-| NFR | Alvo | Estado |
-|---|---|---|
-| Performance | *bundle* inicial < 100 KB gzip; leitura fluida | ✅ ~94 KB |
-| Custo | 0 MT até ~10k users | ✅ free-tiers |
-| Offline | ler livros descarregados sem rede | ✅ |
-| Segurança de dados | isolamento por utilizador (RLS) | ✅ |
-| Segurança de conteúdo | EPUB inacessível a não-subscritores | ⚠️ público no MVP → 🔷 URL assinado |
-| Responsividade | telemóvel, tablet, laptop | ✅ |
-| Idioma / A11y | 100% português; contraste, alvos de toque | ✅ pt / ⚠️ a11y parcial |
+| Requisito | Alvo |
+|---|---|
+| Desempenho | pacote inicial reduzido (< 100 KB comprimido); leitura fluida |
+| Custo operacional | nulo até à ordem dos 10 000 utilizadores |
+| Disponibilidade *offline* | leitura de livros descarregados sem rede |
+| Isolamento de dados | separação estrita entre utilizadores |
+| Protecção de conteúdo | ficheiro do livro inacessível a não-subscritores |
+| Responsividade | telemóvel, *tablet* e computador |
+| Idioma e acessibilidade | interface integralmente em português; contraste e alvos de toque adequados |
 
-> 📸 **Screenshots:** Home no **telemóvel** e no **desktop** (lado a lado, para mostrar a responsividade).
+*Capturas sugeridas:* ecrã principal em telemóvel e em computador (lado a lado), para
+evidenciar a responsividade e o tema claro/escuro.
 
 ---
 
-## 2. Arquitectura
+## 2. Arquitectura do sistema
 
-**4 camadas** — Cliente → *Gatekeeper* → Dados/Vault → M-Pesa.
+O sistema organiza-se em quatro camadas, do cliente ao serviço de pagamento.
 
-> 📊 **Diagrama:** Arquitectura em camadas (C4 nível 2 / componentes).
+**Figura 2 — Arquitectura em camadas:**
 
 ```mermaid
 flowchart TB
   subgraph C["1 · CLIENTE (PWA)"]
-    UI["React SPA + Zustand"]
-    DX[("Dexie / IndexedDB\nprogresso, sessões, EPUB offline, cache")]
-    SW["Service Worker (Workbox)"]
+    UI["Interface (aplicação de página única)"]
+    DX[("Armazenamento local\nprogresso, sessões, livros offline, catálogo")]
+    SW["Trabalhador de serviço (cache do invólucro)"]
   end
-  subgraph G["2 · GATEKEEPER"]
-    AUTH["Supabase Auth\nJWT · Google OAuth"]
-    RLS["Row-Level Security\n(autorização por linha)"]
-    EF["Edge Functions\n(service_role)"]
+  subgraph G["2 · CONTROLO DE ACESSO"]
+    AUTH["Autenticação\n(sessão · início de sessão federado)"]
+    RLS["Segurança ao nível da linha\n(autorização por registo)"]
+    EF["Funções de servidor\n(operações privilegiadas)"]
   end
-  subgraph D["3 · DADOS / VAULT"]
-    PG[("PostgreSQL\n10 tabelas")]
-    R2[("Cloudflare R2\nEPUBs + capas")]
+  subgraph D["3 · DADOS E CONTEÚDO"]
+    PG[("Base de dados relacional")]
+    R2[("Armazenamento de objectos\nlivros e capas")]
   end
-  subgraph M["4 · M-PESA"]
-    MP["Vodacom OpenAPI (C2B)"]
+  subgraph M["4 · PAGAMENTO"]
+    MP["M-Pesa (Vodacom)"]
   end
 
-  UI <-->|"anon key + JWT"| AUTH
-  UI <-->|"REST (RLS)"| RLS --> PG
-  UI <-->|"sync"| DX
-  UI -->|"GET EPUB"| R2
-  UI -->|"invoke"| EF
-  EF -->|"service_role"| PG
-  EF <-->|"C2B + webhook"| MP
-  SW -.->|"precache shell"| UI
+  UI <-->|"credencial pública + sessão"| AUTH
+  UI <-->|"leitura/escrita mediada"| RLS --> PG
+  UI <-->|"sincronização"| DX
+  UI -->|"acesso ao livro"| R2
+  UI -->|"invocação"| EF
+  EF -->|"operações privilegiadas"| PG
+  EF <-->|"cobrança e notificação"| MP
+  SW -.-> UI
 ```
 
-**Fronteira Zero-Trust (o ponto-chave da apresentação):**
-- A `anon key` é **pública por desenho** — não dá acesso a nada sem passar pela **RLS**.
-- O cliente **nunca** consegue tornar uma subscrição `active`: só a Edge Function (com `service_role`) chama `activate_subscription`, e só a partir do *webhook* do M-Pesa.
-- O progresso de leitura é **monotónico no servidor** (um *trigger* impede regressões).
+**O princípio Zero-Trust na prática.** A credencial usada pelo cliente é pública por
+concepção: não concede, por si só, acesso a qualquer dado — todo o acesso é filtrado pela
+camada de autorização por registo. Operações críticas, como a activação de uma subscrição,
+não podem ser desencadeadas pelo cliente; ocorrem exclusivamente no servidor, em resposta a
+eventos de confiança. De igual modo, a integridade do progresso de leitura é garantida pelo
+servidor, que impede qualquer regressão do valor registado.
 
-> 📸 **Screenshots:** dashboard Supabase (Auth + Database), painel R2 no Cloudflare.
+*Capturas sugeridas:* consola de administração da base de dados e do armazenamento de objectos.
 
 ---
 
-## 3. Modelo de dados
+## 3. Modelo de dados e segurança de acesso
 
-**10 tabelas** (8 do núcleo + `favorites` e `notifications` acrescentadas com as funcionalidades).
+O modelo relacional é composto por dez entidades, cobrindo perfis, catálogo, progresso de
+leitura, subscrições, pagamentos, estatísticas de gamificação, pedidos de livros e votação,
+favoritos e notificações.
 
-> 📊 **Diagrama:** ER (entidade-relação).
+**Figura 3 — Diagrama entidade-relação:**
 
 ```mermaid
 erDiagram
-  auth_users ||--|| profiles : "1:1"
-  auth_users ||--|| user_stats : "1:1"
-  auth_users ||--o{ subscriptions : tem
-  auth_users ||--o{ payments : faz
-  auth_users ||--o{ reading_progress : lê
-  auth_users ||--o{ favorites : guarda
-  auth_users ||--o{ notifications : recebe
-  auth_users ||--o{ request_votes : vota
-  books ||--o{ reading_progress : "é lido em"
-  books ||--o{ favorites : "é guardado em"
-  book_requests ||--o{ request_votes : recebe
+  utilizador ||--|| perfil : "1:1"
+  utilizador ||--|| estatisticas : "1:1"
+  utilizador ||--o{ subscricao : possui
+  utilizador ||--o{ pagamento : realiza
+  utilizador ||--o{ progresso : regista
+  utilizador ||--o{ favorito : guarda
+  utilizador ||--o{ notificacao : recebe
+  utilizador ||--o{ voto : emite
+  livro ||--o{ progresso : "é lido em"
+  livro ||--o{ favorito : "é guardado em"
+  pedido ||--o{ voto : recebe
 
-  profiles { uuid id PK "→auth.users"
-    text name
-    text phone
-    text_arr genres }
-  books { text id PK "slug"
-    text title
-    text author
-    int pages
-    text genre
-    text epub_path
-    text cover_path
-    bool is_published }
-  reading_progress { uuid user_id PK
-    text book_id PK
-    int progress_pct
-    text last_cfi
-    bool is_finished }
-  subscriptions { uuid id PK
-    uuid user_id
-    text status "inactive|pending|active|expired"
-    timestamptz expires_at
-    text mpesa_transaction_id }
-  payments { uuid id PK
-    text transaction_id UK
-    numeric amount
-    text status
-    jsonb raw }
-  user_stats { uuid user_id PK
-    int xp
-    int level
-    int streak_days
-    int books_read
-    int hours_read
-    date last_read_date }
-  book_requests { uuid id PK
-    text title
-    text status
-    int vote_count }
-  request_votes { uuid request_id PK
-    uuid user_id PK }
-  favorites { uuid user_id PK
-    text book_id PK }
-  notifications { uuid id PK
-    uuid user_id
-    text type
-    text title
-    bool read }
+  perfil { id id PK
+    nome texto
+    generos lista }
+  livro { id id PK
+    titulo texto
+    autor texto
+    genero texto
+    publicado booleano }
+  progresso { utilizador id PK
+    livro id PK
+    percentagem inteiro
+    terminado booleano }
+  subscricao { id id PK
+    estado texto
+    expira_em data }
+  pagamento { id id PK
+    referencia id UK
+    montante decimal
+    estado texto }
+  estatisticas { utilizador id PK
+    xp inteiro
+    nivel inteiro
+    sequencia inteiro
+    livros_lidos inteiro
+    horas inteiro }
+  pedido { id id PK
+    titulo texto
+    estado texto
+    votos inteiro }
+  voto { pedido id PK
+    utilizador id PK }
+  favorito { utilizador id PK
+    livro id PK }
+  notificacao { id id PK
+    tipo texto
+    lida booleano }
 ```
 
-**Excerto do schema SQL** (mostrar 1–2 tabelas + os *checks*):
+**Segurança de acesso aos dados.** A autorização é aplicada por registo, segundo as regras
+resumidas na tabela seguinte. Este modelo dispensa lógica de permissões no cliente: mesmo com
+a credencial pública, cada pedido só devolve ou altera os dados a que o utilizador tem direito.
 
-```sql
-create table public.subscriptions (
-  id                   uuid primary key default gen_random_uuid(),
-  user_id              uuid not null references auth.users(id) on delete cascade,
-  status               text not null default 'inactive'
-                         check (status in ('inactive','pending','active','expired')),
-  expires_at           timestamptz,
-  mpesa_transaction_id text
-);
-create table public.reading_progress (
-  user_id      uuid references auth.users(id) on delete cascade,
-  book_id      text references public.books(id) on delete cascade,
-  progress_pct int  not null default 0 check (progress_pct between 0 and 100),
-  is_finished  boolean not null default false,
-  primary key (user_id, book_id)
-);
-```
-
-**Políticas RLS** (a tabela mais importante da secção):
-
-| Tabela | SELECT | INSERT / UPDATE | Racional |
+| Entidade | Leitura | Escrita | Justificação |
 |---|---|---|---|
-| `books` | público se `is_published` | — (só `service_role`) | catálogo é leitura pública |
-| `profiles`, `user_stats`, `reading_progress`, `favorites`, `notifications` | `user_id = auth.uid()` | próprio | isolamento por utilizador |
-| `subscriptions`, `payments` | próprio (SELECT) | **sem** política de escrita → cliente **não escreve** | activação só via `service_role` |
-| `request_votes` | próprio (privacidade) | próprio | voto secreto; contagem denormalizada por *trigger* |
-| `book_requests` | todos os autenticados | criar como autor | quadro público de pedidos |
+| Catálogo | pública (apenas itens publicados) | reservada ao servidor | o catálogo é informação pública |
+| Perfil, estatísticas, progresso, favoritos, notificações | apenas o próprio | apenas o próprio | isolamento entre utilizadores |
+| Subscrições e pagamentos | apenas o próprio | reservada ao servidor | a activação é uma operação de confiança |
+| Votos | apenas o próprio (voto secreto) | apenas o próprio | privacidade da votação |
+| Pedidos de livros | todos os autenticados | criação pelo autor | quadro público de sugestões |
 
-**Funções & triggers**
-- `handle_new_user()` — no *signup* cria `profile` + `user_stats` + `subscription` inactiva.
-- `enforce_progress_monotonic()` — `BEFORE UPDATE` em `reading_progress`: `progress_pct := greatest(new, old)`.
-- `sync_vote_count()` — `SECURITY DEFINER`, mantém `book_requests.vote_count`.
-- `activate_subscription()` — `SECURITY DEFINER`, **revogada** de anon/authenticated (só `service_role`).
+**Regras de integridade.** A base de dados assegura invariantes independentemente do cliente:
+o progresso de leitura nunca regride (mantém-se sempre o valor máximo atingido); a contagem de
+votos de cada pedido é mantida automaticamente e de forma consistente; e a criação de uma conta
+inicializa, de forma atómica, o perfil, as estatísticas e uma subscrição inactiva.
 
-> 📸 **Screenshots:** Supabase → Table Editor (lista das tabelas), Policies de uma tabela, SQL Editor com uma migração.
+*Capturas sugeridas:* consola da base de dados com a lista de tabelas e com as políticas de
+acesso de uma tabela.
 
 ---
 
-## 4. Pagamentos M-Pesa
+## 4. Pagamentos M-Pesa e subscrição
 
-> **Estado:** 🔷 Edge Functions **escritas** (`supabase/functions/mpesa-*`), com ponte de pagamento **simulada** em produção até haver credenciais de *merchant* Vodacom.
+A monetização assenta numa subscrição mensal (~45 MT), paga por M-Pesa. A integração segue o
+modelo de cobrança ao cliente (*Customer-to-Business*) da plataforma Vodacom OpenAPI. O fluxo
+foi desenhado de modo a que a activação da subscrição seja um evento exclusivamente
+servidor-a-servidor, nunca controlado pelo cliente.
 
-> 📊 **Diagrama:** Sequência do pagamento (C2B single-stage).
+**Figura 4 — Diagrama de sequência do pagamento:**
 
 ```mermaid
 sequenceDiagram
-  participant U as Utilizador (PWA)
-  participant EF as Edge: mpesa-initiate
-  participant DB as Postgres (service_role)
-  participant MP as M-Pesa (Vodacom)
-  participant CB as Edge: mpesa-callback
+  participant U as Utilizador
+  participant EF as Função de iniciação
+  participant DB as Base de dados
+  participant MP as M-Pesa
+  participant CB as Função de retorno
 
-  U->>EF: invoke({ phone })  (JWT)
-  EF->>DB: cria payment (pending) + subscription = pending
-  EF->>MP: c2bPayment(phone, 45 MT, ref)
-  MP-->>U: prompt de PIN no telemóvel
-  U->>MP: confirma PIN
-  MP->>CB: webhook (sucesso/falha) + token
-  CB->>DB: rpc activate_subscription(user, ref)  ✅ única via
-  U->>DB: poll subscriptions.status → 'active'
+  U->>EF: pedido de pagamento (sessão)
+  EF->>DB: regista pagamento pendente e subscrição pendente
+  EF->>MP: solicita cobrança
+  MP-->>U: pedido de confirmação (PIN) no telemóvel
+  U->>MP: confirma
+  MP->>CB: notificação do resultado
+  CB->>DB: activa a subscrição (via privilegiada única)
+  U->>DB: consulta o estado até "activa"
 ```
 
-> 📊 **Diagrama:** Máquina de estados da subscrição.
+**Figura 5 — Ciclo de vida da subscrição:**
 
 ```mermaid
 stateDiagram-v2
-  [*] --> inactive
-  inactive --> pending: iniciar pagamento
-  pending --> active: webhook sucesso (activate_subscription)
-  pending --> inactive: webhook falha / timeout
-  active --> expired: expires_at ultrapassado
-  expired --> pending: renovar
+  [*] --> inactiva
+  inactiva --> pendente: iniciar pagamento
+  pendente --> activa: confirmação de pagamento
+  pendente --> inactiva: falha ou expiração
+  activa --> expirada: fim do período
+  expirada --> pendente: renovação
 ```
 
-**Tratamento de falhas**
-- **PIN não confirmado / timeout** → `payment.failed`, subscrição volta a `inactive`.
-- **Webhook forjado** → barreira por *token* na URL (`?token=…`) + (🔷) verificação de assinatura.
-- **Idempotência** → `transaction_id` único; `activate_subscription` é seguro re-executar.
+**Tratamento de falhas.** A não confirmação do PIN ou a expiração do pedido revertem a
+subscrição para o estado inactivo. A notificação de resultado é protegida contra chamadas
+forjadas por um segredo partilhado. A referência única de cada transacção garante idempotência,
+tornando a activação segura mesmo perante notificações repetidas.
 
-> 📸 **Screenshots:** ecrãs Checkout → Processing → Success; tabela `payments`; (código) `activate_subscription`.
+*Capturas sugeridas:* sequência dos ecrãs de subscrição (dados, processamento, sucesso); registo de pagamentos.
 
 ---
 
-## 5. Conteúdo & Acesso
+## 5. Conteúdo e protecção
 
-**Ciclo de vida do EPUB — 3 estados.**
+Cada livro, em formato EPUB, percorre três estados ao longo da sua utilização, o que permite
+conciliar economia de dados com leitura *offline*.
 
-> 📊 **Diagrama:** Estados do conteúdo.
+**Figura 6 — Estados do conteúdo:**
 
 ```mermaid
 stateDiagram-v2
-  [*] --> Remoto: catálogo
-  Remoto --> Cache: leitura online (epub.js busca do R2)
-  Cache --> Offline: "Baixar para ler offline"
-  Offline --> [*]: remover download
-  Offline --> Offline: ler sem rede (blob em IndexedDB)
+  [*] --> Remoto: presente no catálogo
+  Remoto --> EmCache: leitura em linha
+  EmCache --> Descarregado: descarga para uso offline
+  Descarregado --> [*]: remoção da descarga
+  Descarregado --> Descarregado: leitura sem rede
 ```
 
-**Modelo de acesso (segurança de conteúdo)**
-- ⚠️ **MVP actual:** EPUBs servidos por **URL público** do R2 (`pub-….r2.dev/…epub`). Simples, mas o *paywall* é só UI — qualquer pessoa com o URL descarrega.
-- 🔷 **Endurecimento planeado (DRM leve):** uma Edge Function/Worker **verifica a subscrição activa** e devolve um **URL assinado de curta duração** (ou faz *stream*). Opcional: **download encriptado AES-256** (Web Crypto), decifrado só no cliente subscrito.
+**Modelo de protecção do conteúdo.** O acesso ao ficheiro do livro é mediado por verificação
+da subscrição activa: o servidor concede uma ligação de acesso temporária, de curta duração,
+apenas a subscritores. Este mecanismo protege a propriedade intelectual sem introduzir a
+fricção de sistemas de gestão de direitos digitais pesados, preservando simultaneamente a
+possibilidade de leitura *offline*.
 
-**Capas reais** ✅ — extraídas do próprio EPUB (`scripts/extract-covers.cjs`): lê o OPF (`meta name=cover` → *manifest*) com *fallback* para a maior imagem, redimensiona (~600px) e sobe para R2; `books.cover_path` aponta lá.
+**Capas dos livros.** As capas apresentadas são extraídas do próprio ficheiro EPUB, a partir
+dos metadados de cada obra, e optimizadas para dimensão reduzida — uma decisão coerente com o
+princípio de economia de dados.
 
-> 📸 **Screenshots:** leitor aberto (mobile + desktop), botão "Baixar" com barra de progresso, tab "Baixados", painel R2 com `epubs/` e `covers/`.
+*Capturas sugeridas:* leitor aberto (telemóvel e computador); descarga de um livro com indicação
+de progresso; separador de livros descarregados.
 
 ---
 
-## 6. Offline & Sincronização
+## 6. Funcionamento *offline* e sincronização
 
-**Camadas de persistência local** (Dexie / IndexedDB, `src/data/db.ts`):
+A aplicação mantém várias camadas de persistência local, que permitem o uso sem ligação:
 
-| Store | Guarda |
+| Camada local | Conteúdo |
 |---|---|
-| `readingProgress` | progresso + `lastCfi` por livro (monotónico) |
-| `readingSessions` | sessões de leitura (minutos por dia) → atividade/stats |
-| `offlineBooks` | o **EPUB inteiro** (ArrayBuffer) para ler offline |
-| `booksCache` | catálogo em cache → livros visíveis sem rede |
+| Progresso de leitura | posição e percentagem por livro |
+| Sessões de leitura | tempo lido por dia, base das estatísticas |
+| Livros *offline* | ficheiro completo do livro para leitura sem rede |
+| Cache do catálogo | lista de livros disponível sem ligação |
 
-> 📊 **Diagrama:** Fila de sync & resolução de conflitos.
+**Figura 7 — Sincronização e resolução de conflitos:**
 
 ```mermaid
 flowchart LR
-  R["Ler página"] --> L[("Dexie (local, imediato)")]
-  L -->|"fire-and-forget"| S["Supabase upsert"]
-  S --> T{"trigger monotónico"}
-  T -->|"guarda o maior pct"| PG[("reading_progress")]
-  subgraph Arranque
-    A["load()"] --> L2[("Dexie primeiro (rápido/offline)")]
-    L2 --> Merge["merge: max(pct)"]
-    Merge --> Online{"online?"}
-    Online -->|sim| Fetch["Supabase → funde"]
-    Online -->|não| Keep["fica o local"]
-  end
+  R["Leitura de página"] --> L[("Registo local (imediato)")]
+  L -->|"em segundo plano"| S["Sincronização com o servidor"]
+  S --> T{"invariante de integridade"}
+  T -->|"mantém o valor máximo"| PG[("Progresso persistido")]
+  A["Arranque"] --> L2[("Leitura do estado local")]
+  L2 --> Online{"há rede?"}
+  Online -->|sim| Fusao["Fusão com o servidor"]
+  Online -->|não| Local["Mantém o estado local"]
 ```
 
-**Resolução de conflitos:** *last-write* não serve para progresso (pode regredir). Usa-se **monotonia** — fica sempre o **maior** `progress_pct` (cliente e *trigger* no servidor). Sessão persistente offline: em erro de rede (`navigator.onLine === false`) **não** se limpa a sessão.
+**Resolução de conflitos.** Para o progresso de leitura, uma política de "última escrita vence"
+seria inadequada, pois poderia fazer regredir a posição do leitor. Adopta-se, por isso, uma
+regra de monotonia: prevalece sempre o maior valor de progresso, tanto no cliente como no
+servidor. A sessão do utilizador é preservada em situações de ausência de rede, de modo a
+que a aplicação continue utilizável sem ligação.
 
-> 📸 **Screenshots:** DevTools → Application → IndexedDB (stores com dados); ler com o modo avião ligado.
+*Capturas sugeridas:* inspecção do armazenamento local no navegador; leitura com o dispositivo
+em modo de voo.
 
 ---
 
 ## 7. Gamificação
 
-**XP & níveis** (`src/data/catalog.ts`, `user_stats`):
+Para incentivar o hábito de leitura, o sistema atribui pontos de experiência e organiza o
+progresso em quatro níveis.
 
-| Nível | Nome | XP |
+| Nível | Designação | Experiência |
 |---|---|---|
 | I | Leitor Iniciante | 0 |
 | II | Explorador | 2 500 |
 | III | Contador de Histórias | 8 000 |
 | IV | Guardião das Palavras | 20 000 |
 
-- **Fontes de XP:** ✅ +50 por pedido de livro · 🔷 XP por páginas/livros lidos.
-- **Streak** ✅ — dias consecutivos via `last_read_date` (hoje→nada, ontem→+1, senão→1).
-- **Livros lidos** ✅ — incrementa ao cruzar **95%** pela 1ª vez.
-- **Horas** ✅ — somadas das sessões de leitura (Dexie).
-- **Subida de nível** → cria **notificação** e emite o modal de celebração.
+A experiência é atribuída por acções de envolvimento, como o pedido de novos livros. O sistema
+regista ainda a sequência de dias consecutivos de leitura (*streak*), o número de livros
+concluídos — contabilizado quando o progresso ultrapassa o limiar de conclusão — e o total de
+horas lidas, apurado a partir das sessões. A subida de nível gera automaticamente uma notificação
+de celebração.
 
-> 📊 **Diagrama:** Arquitectura do *trigger*/store de gamificação.
+**Figura 8 — Fluxo de actualização das estatísticas:**
 
 ```mermaid
 flowchart TB
-  Read["Reader: fim de sessão / 95%"] --> Act["activity.ts: updateAggregates()"]
-  Act --> US[("user_stats: xp, level, streak, books_read, hours")]
-  Act --> Lvl{"subiu de nível?"}
-  Lvl -->|sim| Notif[("notifications: 'Subiste ao nível X'")]
-  Signup["signup"] --> Trig["trigger handle_new_user()"] --> US
+  Leitura["Fim de sessão / conclusão de livro"] --> Agrega["Actualização de estatísticas"]
+  Agrega --> Est[("Experiência, nível, sequência, livros, horas")]
+  Agrega --> Subiu{"subiu de nível?"}
+  Subiu -->|sim| Notif[("Notificação de novo nível")]
+  Conta["Criação de conta"] --> Init["Inicialização de estatísticas"] --> Est
 ```
 
-> 📸 **Screenshots:** ecrã Perfil (XP + níveis + streak), ecrã "Stats detalhados" (gráfico de 30 dias, por género), modal/notificação de subida de nível.
+*Capturas sugeridas:* ecrã de perfil (experiência, nível e sequência); ecrã de estatísticas
+detalhadas (actividade dos últimos 30 dias e distribuição por género).
 
 ---
 
-## 8. Partilha viral
+## 8. Partilha
 
-**5 cartões** (1080×1920, `src/screens/social/share-cards/`): Livro lido · Streak · Nível · Wrapped · Citação — todos com **dados reais** do utilizador.
+A partilha funciona como mecanismo de crescimento orgânico. A aplicação gera cinco tipos de
+cartão visual — livro concluído, sequência de leitura, subida de nível, resumo periódico e
+citação — compostos com os dados reais do utilizador. Cada cartão é convertido em imagem e
+partilhado através do menu nativo do dispositivo, que integra as aplicações de mensagens e
+redes sociais mais usadas.
 
-**Mecanismo:** `html2canvas` captura um nó *offscreen* em tamanho real → `navigator.share({ files })` (menu nativo com WhatsApp/Instagram/…) com *fallback* de *download*.
-
-> 📊 **Diagrama:** *Loop* viral.
+**Figura 9 — Ciclo de crescimento por partilha:**
 
 ```mermaid
 flowchart LR
-  Milestone["Marco (livro lido, streak, nível)"] --> Card["Gera cartão (html2canvas)"]
-  Card --> Share["Partilha nativa (WhatsApp/IG)"]
-  Share --> Link["Amigos veem zuribook.page"]
-  Link --> Install["Instalam a PWA"]
-  Install --> Milestone
+  Marco["Marco de leitura"] --> Cartao["Geração do cartão"]
+  Cartao --> Partilha["Partilha nativa"]
+  Partilha --> Ligacao["Amigos acedem à aplicação"]
+  Ligacao --> Instalacao["Instalação da PWA"]
+  Instalacao --> Marco
 ```
 
-- 🔷 **Referral tracking** (atribuir instalações a quem partilhou) — por implementar.
-
-> 📸 **Screenshots:** modal de partilha (preview + botões), os **5 cartões**, o menu de partilha nativo do telemóvel.
+*Capturas sugeridas:* janela de partilha com pré-visualização; os cinco cartões; menu de
+partilha nativo do dispositivo.
 
 ---
 
 ## 9. Infraestrutura
 
-**Stack *free-tier*** ✅
+A infraestrutura foi escolhida para minimizar o custo operacional, assentando em escalões
+gratuitos permanentes, com entrega e implantação contínuas a partir do repositório de código.
+
+**Figura 10 — Fluxo de implantação (integração/entrega contínua):**
 
 ```mermaid
 flowchart LR
-  Dev["git push (GitHub)"] --> CI["Cloudflare Workers Build\n(build.command: npm run build)"]
-  CI --> W["Cloudflare Worker\n(SPA + assets) · zuribook.page"]
-  W --> R2[("R2: EPUBs + capas")]
-  W <--> SB[("Supabase: Postgres+Auth+Edge")]
+  Dev["Envio de código"] --> CI["Compilação automática"]
+  CI --> W["Aplicação publicada (domínio próprio)"]
+  W --> R2[("Armazenamento de objectos: livros e capas")]
+  W <--> SB[("Serviço de dados: base de dados, autenticação, funções")]
 ```
 
-- **Cloudflare** (Worker/Pages + R2, *egress* grátis) · **Supabase** (Postgres+Auth+RLS+Edge, região EU) · **GitHub** (CI/CD) · domínio `.page` (GitHub Student Pack).
+**Planeamento de capacidade por fase.** A arquitectura acompanha o crescimento sem alterações
+estruturais:
 
-**Capacity planning por fase**
+| Fase | Utilizadores | Dimensionamento |
+|---|---|---|
+| Arranque | até ~1 000 | escalões gratuitos, sem custo |
+| Crescimento | ~1 000 a ~10 000 | ainda dentro dos escalões gratuitos; monitorização do consumo |
+| Escala | acima de 10 000 | passagem a escalões pagos e reforço de *cache* |
 
-| Fase | Users | O que aguenta o free-tier | Ação |
-|---|---|---|---|
-| 0–1k | arranque | Supabase free (500 MB) + R2 (10 GB) | nada |
-| 1k–10k | crescimento | ainda dentro do free-tier; vigiar egress/DB | observabilidade (Sentry) |
-| 10k+ | escala | Supabase Pro, R2 pago, CDN | 🔷 upgrade + cache agressivo |
+A observabilidade (recolha de erros e métricas) está prevista como reforço na fase de
+crescimento.
 
-- 🔷 **Observabilidade:** Sentry/Datadog (Student Pack) por ligar.
-
-> 📸 **Screenshots:** Cloudflare (Worker + R2 + domínio), logs de *build*/deploy, Supabase (uso do free-tier).
-
----
-
-## 10. Roadmap técnico & ADRs
-
-**Fases**
-- **Fase 1 (feito ✅):** PWA responsiva, catálogo real, auth Google, leitor epub.js, offline, gamificação, partilha, notificações, deploy CI/CD.
-- **Fase 2 (a seguir 🔷):** M-Pesa real + gate de subscrição ligado ao Postgres; **acesso ao conteúdo seguro** (URL assinado); mais catálogo.
-- **Fase 3 (escala 🔷):** referral, push (VAPID), observabilidade, i18n adicional, upgrade de tier.
-
-> 📊 **Diagrama:** *Roadmap* (linha temporal).
-
-```mermaid
-flowchart LR
-  F1["Fase 1 ✅\nMVP funcional"] --> F2["Fase 2 🔷\nreceita + segurança"] --> F3["Fase 3 🔷\nescala + crescimento"]
-```
-
-**Registos de decisão de arquitectura (ADRs)**
-
-| # | Decisão | Escolha | Porquê |
-|---|---|---|---|
-| 1 | Nativo/Expo **vs** PWA | **PWA** | um código, sem app store, actualização instantânea, instalável em telemóvel/tablet/laptop |
-| 2 | *Vault* de EPUBs | **R2** (rejeitado **Telegram**) | Telegram viola ToS (ban=perde catálogo) e exige *proxy*; R2 tem *egress* grátis |
-| 3 | *Backend* | **Supabase** | Postgres + Auth + RLS + Edge num free-tier durável |
-| 4 | Custos | **Free-tiers permanentes** (não créditos) | créditos criam um precipício quando acabam |
-| 5 | Segurança de conteúdo | **DRM leve** (URL assinado) 🔷 | proteger sem fricção; DRM pesado afasta e complica o offline |
-| 6 | Cartões de partilha | **html2canvas** (web) | render fiel no browser sem dependências nativas |
+*Capturas sugeridas:* consola da plataforma de alojamento e de armazenamento; registo de uma
+implantação; consola do serviço de dados com o consumo dos escalões gratuitos.
 
 ---
 
 ## Apêndice
 
-### Lista de diagramas (todos em Mermaid, prontos a exportar como imagem)
-1. **User-flow** dos ecrãs — §0 Design
-2. **Arquitectura em camadas** (C4/componentes) — §2
-3. **ER** das 10 tabelas — §3
-4. **Sequência** do pagamento M-Pesa — §4
-5. **Máquina de estados** da subscrição — §4
-6. **Estados do EPUB** (remoto/cache/offline) — §5
-7. **Fila de sync & conflitos** — §6
-8. **Trigger/store de gamificação** — §7
-9. **Loop viral** de partilha — §8
-10. **Deployment/CI-CD** — §9
-11. **Roadmap** (linha temporal) — §10
+### Figuras (diagramas)
+As figuras 1 a 10 estão descritas em notação *Mermaid*, renderizável em editores compatíveis
+ou no serviço *mermaid.live*, a partir do qual podem ser exportadas como imagem para os
+diapositivos.
 
-> Como exportar: abrir este `.md` no VS Code (extensão *Markdown Preview Mermaid*) ou no GitHub, ou colar cada bloco em https://mermaid.live e exportar PNG/SVG para os *slides*.
+| Figura | Tipo | Secção |
+|---|---|---|
+| 1 | Fluxo de navegação | 0 |
+| 2 | Arquitectura em camadas | 2 |
+| 3 | Entidade-relação | 3 |
+| 4 | Sequência (pagamento) | 4 |
+| 5 | Máquina de estados (subscrição) | 4 |
+| 6 | Estados do conteúdo | 5 |
+| 7 | Sincronização | 6 |
+| 8 | Actualização de estatísticas | 7 |
+| 9 | Ciclo de partilha | 8 |
+| 10 | Implantação | 9 |
 
-### Lista de screenshots a tirar
-- **Design:** wireframes, design system, alta fidelidade, Figma vs app real
-- **App (mobile + desktop):** Home, Explorar, Biblioteca, Perfil
-- **Leitor:** página aberta, preferências, "Baixar"/progresso, tab "Baixados"
-- **Paywall:** Checkout, Processing, Success
-- **Social:** modal de partilha + 5 cartões, menu de partilha nativo, Notificações, Mais pedidos
-- **Stats:** Perfil (XP/streak), Stats detalhados (gráfico)
-- **Backend:** Supabase (tabelas, policies, SQL), Cloudflare (Worker, R2, domínio), logs de deploy
-- **Offline:** DevTools → IndexedDB; ler em modo avião
-
----
-
-_Relatório gerado a partir do código real do projecto. Manter os marcadores ✅/⚠️/🔷 na apresentação — demonstra rigor e evita afirmar o que ainda não está feito._
+### Capturas de ecrã sugeridas
+- **Design:** *wireframes*; sistema de *design*; alta fidelidade; comparação Figma vs aplicação.
+- **Aplicação (telemóvel e computador):** ecrã principal, catálogo, biblioteca, perfil.
+- **Leitor:** página aberta, preferências, descarga com progresso, livros descarregados.
+- **Subscrição:** dados, processamento, sucesso.
+- **Social:** janela de partilha e cartões, menu nativo, notificações, quadro de pedidos.
+- **Estatísticas:** perfil e estatísticas detalhadas.
+- **Infraestrutura:** consolas de alojamento, armazenamento e dados; registo de implantação.
+- **Offline:** armazenamento local no navegador; leitura em modo de voo.

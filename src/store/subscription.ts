@@ -7,7 +7,18 @@ interface SubState {
   status: SubStatus
   expiresAt: string | null
   setPending: () => void
-  setActive: () => void
+  load: (userId: string) => Promise<void>
+  activate: (userId: string) => Promise<void>
+}
+
+function fmtDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+function calcStatus(row: { status: string; expiresAt: string | null }): SubStatus {
+  return row.status === 'active' && row.expiresAt && new Date(row.expiresAt) > new Date()
+    ? 'active'
+    : 'inactive'
 }
 
 export const useSubStore = create<SubState>()(
@@ -16,10 +27,18 @@ export const useSubStore = create<SubState>()(
       status: 'inactive',
       expiresAt: null,
       setPending: () => set({ status: 'pending' }),
-      setActive: () => {
-        const d = new Date()
-        d.setMonth(d.getMonth() + 1)
-        set({ status: 'active', expiresAt: d.toLocaleDateString('pt-MZ') })
+      load: async (userId: string) => {
+        const { getSubscription } = await import('../data/api/subscription')
+        const row = await getSubscription(userId)
+        if (!row) return
+        set({ status: calcStatus(row), expiresAt: row.expiresAt ? fmtDate(row.expiresAt) : null })
+      },
+      activate: async (userId: string) => {
+        const api = await import('../data/api/subscription')
+        await api.activateSimulated()
+        const row = await api.getSubscription(userId)
+        if (!row) return
+        set({ status: calcStatus(row), expiresAt: row.expiresAt ? fmtDate(row.expiresAt) : null })
       },
     }),
     { name: 'zuri-sub' }

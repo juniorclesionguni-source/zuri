@@ -1,18 +1,32 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSubStore } from '../../store/subscription'
+import { useAuthStore } from '../../store/auth'
 
 export function Processing() {
   const navigate = useNavigate()
-  const setActive = useSubStore((s) => s.setActive)
+  const user = useAuthStore((s) => s.user)
+  const setPending = useSubStore((s) => s.setPending)
 
   useEffect(() => {
     const t = setTimeout(() => {
-      setActive()
-      navigate('/success')
+      void (async () => {
+        if (!user?.id) {
+          setPending()
+          navigate('/paywall')
+          return
+        }
+        try {
+          await useSubStore.getState().activate(user.id)
+          navigate('/success')
+        } catch {
+          setPending()
+          navigate('/paywall')
+        }
+      })()
     }, 2600)
     return () => clearTimeout(t)
-  }, [navigate, setActive])
+  }, [navigate, user, setPending])
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32 }}>

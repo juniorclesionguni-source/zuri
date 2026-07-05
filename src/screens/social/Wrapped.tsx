@@ -9,10 +9,14 @@ export function Wrapped({ onShare }: { onShare: (kind: string) => void }) {
   const navigate = useNavigate()
   const { booksRead, hoursRead, streakDays } = useStatsStore()
   const books = useCatalog((s) => s.books)
+
+  const monthRaw = new Date().toLocaleString('pt-PT', { month: 'long' })
+  const monthUpper = monthRaw.toUpperCase()
+  const monthTitle = monthRaw.charAt(0).toUpperCase() + monthRaw.slice(1)
+
   const stats = [
     ['Livros lidos', String(booksRead)],
     ['Horas', `${hoursRead}h`],
-    ['Páginas', '1 832'],
     ['Streak máximo', `${streakDays} dias`],
   ]
 
@@ -27,7 +31,7 @@ export function Wrapped({ onShare }: { onShare: (kind: string) => void }) {
       </div>
 
       <div style={{ padding: '40px 32px 0' }}>
-        <div style={{ fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 700, letterSpacing: '0.3em' }}>SETEMBRO</div>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 700, letterSpacing: '0.3em' }}>{monthUpper}</div>
         <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 44, lineHeight: 1, marginTop: 8 }}>o teu mês<br/>no Zuri</div>
       </div>
 
@@ -40,20 +44,19 @@ export function Wrapped({ onShare }: { onShare: (kind: string) => void }) {
         ))}
       </div>
 
-      <div style={{ margin: '30px 24px 0', padding: 20, borderRadius: 16, background: 'rgba(254,248,245,0.12)', display: 'flex', gap: 14, alignItems: 'center' }}>
-        <BookCover title={books[0]?.title ?? ''} author={(books[0]?.author ?? '').split(' ').slice(-1)[0]} coverUrl={books[0]?.cover_url} w={60} h={90} />
-        <div>
-          <div style={{ fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.8 }}>Livro do mês</div>
-          <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, fontWeight: 500, marginTop: 4 }}>{books[0]?.title ?? ''}</div>
-          <div style={{ fontFamily: 'var(--sans)', fontSize: 12, opacity: 0.85 }}>8 dias · 5h 40min</div>
+      {books[0] && (
+        <div style={{ margin: '30px 24px 0', padding: 20, borderRadius: 16, background: 'rgba(254,248,245,0.12)', display: 'flex', gap: 14, alignItems: 'center' }}>
+          <BookCover title={books[0].title} author={books[0].author.split(' ').slice(-1)[0]} coverUrl={books[0].cover_url} w={60} h={90} />
+          <div>
+            <div style={{ fontFamily: 'var(--sans)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.8 }}>Livro do mês</div>
+            <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, fontWeight: 500, marginTop: 4 }}>{books[0].title}</div>
+          </div>
         </div>
-      </div>
-
-      <div style={{ padding: '28px 32px 0', fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 20, opacity: 0.9, lineHeight: 1.4 }}>"Leste 3× mais do que em agosto. Continua assim."</div>
+      )}
 
       <div style={{ padding: '32px 24px 0' }}>
         <button onClick={() => onShare('wrapped')} style={{ width: '100%', height: 52, borderRadius: 12, border: 'none', background: '#FEF8F5', color: '#C96A58', fontFamily: 'var(--sans)', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
-          Partilhar o meu Setembro
+          Partilhar o meu {monthTitle}
         </button>
       </div>
     </div>

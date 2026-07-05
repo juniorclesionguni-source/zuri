@@ -19,7 +19,7 @@ export function Success() {
         </div>
       </div>
       <h1 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 38, color: 'var(--text)', margin: '28px 0 10px' }}>Pronto.</h1>
-      <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--text2)', margin: '0 0 40px', maxWidth: 260 }}>A tua subscrição está ativa até {expiresAt ?? '19 de maio'}.</p>
+      <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--text2)', margin: '0 0 40px', maxWidth: 260 }}>A tua subscrição está ativa{expiresAt ? ` até ${expiresAt}` : ' durante 1 mês'}.</p>
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <PrimaryButton onClick={() => navigate('/home')}>Começar a ler</PrimaryButton>
         <GhostButton onClick={() => navigate('/library')}>Ver a minha biblioteca</GhostButton>
