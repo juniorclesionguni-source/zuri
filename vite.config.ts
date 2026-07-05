@@ -16,7 +16,7 @@ export default defineConfig({
         theme_color: '#C96A58',
         background_color: '#FEF8F5',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'any', // responsivo: adapta-se a retrato/paisagem (telemóvel, tablet, laptop)
         start_url: '/',
         icons: [
           { src: '/icons/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },
