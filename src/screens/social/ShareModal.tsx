@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useLayoutEffect } from 'react'
 import html2canvas from 'html2canvas'
 import { Icon } from '../../components/ui/Icon'
 import { CardBookFinished } from './share-cards/CardBookFinished'
@@ -23,6 +23,21 @@ export function ShareModal({ initialKind = 'wrapped', onClose }: { initialKind?:
   const [kind, setKind] = useState(initialKind)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
+
+  // Preview escala ao máximo que cabe no espaço livre (mede o contentor).
+  const previewRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(0.28)
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = previewRef.current
+      if (!el) return
+      const s = Math.min(el.clientHeight / 1920, el.clientWidth / 1080)
+      if (s > 0) setScale(s)
+    }
+    measure()
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [])
 
   const stats = useStatsStore()
   const books = useCatalog((s) => s.books)
@@ -117,7 +132,7 @@ export function ShareModal({ initialKind = 'wrapped', onClose }: { initialKind?:
         <Component {...propsFor(kind)} />
       </div>
 
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'var(--bg)', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: '14px 20px 36px', maxHeight: '92%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ position: 'absolute', top: '6%', bottom: 0, left: 0, right: 0, background: 'var(--bg)', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: '12px 20px 28px', display: 'flex', flexDirection: 'column' }}>
         <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--border)', margin: '0 auto 18px' }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -125,10 +140,10 @@ export function ShareModal({ initialKind = 'wrapped', onClose }: { initialKind?:
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}><Icon name="x" size={22} color="var(--text3)" strokeWidth={1.8} /></button>
         </div>
 
-        {/* preview escalado (só visual) — transform no FILHO, origem top-left (como as thumbs) */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16, flexShrink: 0 }}>
-          <div style={{ width: `${1080 * 0.26}px`, height: `${1920 * 0.26}px`, overflow: 'hidden', borderRadius: 12, boxShadow: '0 8px 40px rgba(0,0,0,0.3)' }}>
-            <div style={{ transform: 'scale(0.26)', transformOrigin: 'top left', width: 1080, height: 1920 }}>
+        {/* preview: ocupa o espaço livre e escala ao máximo que cabe */}
+        <div ref={previewRef} style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+          <div style={{ width: `${1080 * scale}px`, height: `${1920 * scale}px`, overflow: 'hidden', borderRadius: 14, boxShadow: '0 8px 40px rgba(0,0,0,0.3)' }}>
+            <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: 1080, height: 1920 }}>
               <Component {...propsFor(kind)} />
             </div>
           </div>
@@ -138,8 +153,8 @@ export function ShareModal({ initialKind = 'wrapped', onClose }: { initialKind?:
         <div className="hide-scrollbar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 20, flexShrink: 0 }}>
           {CARDS.map((c) => (
             <div key={c.kind} onClick={() => setKind(c.kind)} style={{ flexShrink: 0, cursor: 'pointer' }}>
-              <div style={{ width: `${1080 * 0.08}px`, height: `${1920 * 0.08}px`, borderRadius: 6, overflow: 'hidden', border: `2px solid ${kind === c.kind ? 'var(--accent)' : 'var(--border)'}`, position: 'relative' }}>
-                <div style={{ transform: 'scale(0.08)', transformOrigin: 'top left', width: 1080, height: 1920 }}>
+              <div style={{ width: `${1080 * 0.06}px`, height: `${1920 * 0.06}px`, borderRadius: 6, overflow: 'hidden', border: `2px solid ${kind === c.kind ? 'var(--accent)' : 'var(--border)'}`, position: 'relative' }}>
+                <div style={{ transform: 'scale(0.06)', transformOrigin: 'top left', width: 1080, height: 1920 }}>
                   <c.Component {...propsFor(c.kind)} />
                 </div>
               </div>
