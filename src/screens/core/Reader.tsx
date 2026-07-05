@@ -4,6 +4,7 @@ import { useIsDesktop } from '../../hooks/useBreakpoint'
 import { Icon } from '../../components/ui/Icon'
 import { ReaderSettings } from './ReaderSettings'
 import { useCatalog } from '../../store/catalog'
+import { useLibrary } from '../../store/library'
 import { useAuthStore } from '../../store/auth'
 import { saveProgress, getProgress, logSession, getOfflineBook } from '../../data/db'
 import { progress as progressApi } from '../../data/services'
@@ -128,9 +129,14 @@ export function Reader() {
         if (destroyed) return
         setLoading(false)
 
+        let turns = 0
         renditionInstance.on('relocated', (loc: any) => {
-          if (!epubInstance.locations?.total) return
-          const pct = Math.round(epubInstance.locations.percentageFromCfi(loc.start.cfi) * 100)
+          turns++
+          let pct = epubInstance.locations?.total
+            ? Math.round(epubInstance.locations.percentageFromCfi(loc.start.cfi) * 100)
+            : 0
+          // A partir da 3ª página conta como "a ler", mesmo que a % ainda arredonde a 0.
+          if (turns >= 3) pct = Math.max(pct, 1)
           setProg(pct)
         })
 
@@ -178,6 +184,10 @@ export function Reader() {
     prevPctRef.current = prog
     saveProgress(user.id, book.id, prog)
     progressApi.sync(user.id, book.id, prog).catch(() => {})
+    // Reflecte já na Biblioteca / Home (o store não recarrega sozinho após ler).
+    useLibrary.setState((s) => ({
+      progress: { ...s.progress, [book.id]: { pct: Math.max(prog, s.progress[book.id]?.pct ?? 0), finished: prog >= 95, updatedAt: Date.now() } },
+    }))
   }, [prog, book?.id, user?.id])
 
   const { bg } = THEMES[theme] ?? THEMES['sépia']

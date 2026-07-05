@@ -6,11 +6,10 @@ import { useCatalog } from '../../store/catalog'
 import { useLibrary } from '../../store/library'
 import type { Book } from '../../data/catalog'
 
-const TABS = ['A ler', 'Por ler', 'Terminados', 'Favoritos', 'Baixados']
+const TABS = ['A ler', 'Terminados', 'Favoritos', 'Baixados']
 
 const EMPTY: Record<string, string> = {
   'A ler':      'Ainda não começaste nenhum livro',
-  'Por ler':    'Todos os livros já têm progresso',
   'Terminados': 'Ainda não terminaste nenhum livro',
   'Favoritos':  'Ainda não adicionaste favoritos',
   'Baixados':   'Ainda sem downloads',
@@ -26,14 +25,12 @@ export function Library() {
 
   const inProgress = books.filter((b) => { const p = progress[b.id]; return p && p.pct > 0 && p.pct < 95 })
   const finished   = books.filter((b) => { const p = progress[b.id]; return p && (p.pct >= 95 || p.finished) })
-  const unread     = books.filter((b) => !progress[b.id])
   const favBooks   = books.filter((b) => favorites.has(b.id))
   const downloadedBooks = books.filter((b) => downloads[b.id])
   const totalMb = Object.values(downloads).reduce((s, d) => s + d.sizeMb, 0)
 
   const ITEMS: Record<string, Book[]> = {
     'A ler':      inProgress,
-    'Por ler':    unread,
     'Terminados': finished,
     'Favoritos':  favBooks,
     'Baixados':   downloadedBooks,

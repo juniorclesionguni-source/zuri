@@ -1,191 +1,186 @@
-# Zuri — Roteiro de Defesa
-### Guião de apresentação · 6 apresentadores · 25 min + perguntas
+# Zuri — Roteiro de Defesa (SEM slides)
+### Apresentação com a app ao vivo · 6 apresentadores · ~25 min + perguntas
 
-> Objectivo: uma defesa fluida em que **todos falam bem** e por igual. Cada pessoa tem uma
-> parte fechada, com o que dizer, o que mostrar, a frase de transição e uma dica de entrega.
-> A app está em https://zuribook.page — ter aberta em telemóvel **e** computador para a demo.
+> **Sem slides.** O apoio visual é a **própria aplicação**, projectada num ecrã/TV (ou num
+> portátil que o júri veja). Cada pessoa **mostra a sua parte na app** enquanto fala. Os conceitos
+> que não se veem (arquitectura, segurança) explicam-se com **analogias**.
+> App: https://zuribook.page — abrir **antes** de começar, com sessão iniciada.
 
 ---
+
+## Preparação (5 min antes de entrar)
+- **App aberta e projectada** no computador (com a **barra lateral** visível) **e** num **telemóvel**
+  (para a parte mobile). Sessão Google já iniciada; um livro **já descarregado** (para a demo offline).
+- **Subscrição activa** na app (fazer o pagamento simulado antes, para não gastar tempo).
+- **Plano B** (se a internet falhar): o livro descarregado abre offline; ter também 3–4 **capturas no
+  telemóvel** (leitor, perfil, partilha).
+- Combinar **quem conduz a app** em cada momento (idealmente cada apresentador conduz a sua parte).
+- Opcional: um **quadro/flipchart** para quem quiser desenhar as 4 camadas (P2).
 
 ## Distribuição e tempos
-
-| Ordem | Pessoa | Parte | Tempo |
+| # | Pessoa | Parte | Tempo |
 |---|---|---|---|
-| 1 | _[Nome 1]_ | Abertura · Problema · *Design* (Figma) | 4 min |
+| 1 | _[Nome 1]_ | Abertura · Problema · *Design* | 4 min |
 | 2 | _[Nome 2]_ | Arquitectura · *Zero-Trust* | 4 min |
-| 3 | _[Nome 3]_ | Modelo de dados · segurança de acesso | 4 min |
-| 4 | _[Nome 4]_ | Pagamento · subscrição · protecção do conteúdo | 4,5 min |
-| 5 | _[Nome 5]_ | *Offline* · gamificação · partilha | 4 min |
-| 6 | _[Nome 6]_ | Infraestrutura · **demo ao vivo** · conclusão | 5 min |
+| 3 | _[Nome 3]_ | Dados · isolamento por utilizador | 4 min |
+| 4 | _[Nome 4]_ | Pagamento · subscrição · segurança do conteúdo (desenho) | 4 min |
+| 5 | _[Nome 5]_ | *Offline* · gamificação · partilha | 4,5 min |
+| 6 | _[Nome 6]_ | Infraestrutura · responsividade ao vivo · conclusão | 4,5 min |
 | — | Todos | Perguntas & respostas | ~5 min |
 
-**Total:** ~25,5 min de fala + 5 min de perguntas. Para encurtar para 20, cada um corta o exemplo
-mais longo da sua parte e a demo fica em 2 min.
-
----
-
-## Regras de ouro (para todos)
-- **Não leiam os diapositivos.** O slide é apoio; vocês contam a história.
-- **Uma ideia por frase.** Falem devagar; pausa vale mais que pressa.
-- **Olhem para o júri**, não para o ecrã. Sorriam na primeira e na última frase.
-- **Passem a palavra pelo nome:** "para explicar X, passo a palavra ao/à ___".
-- Ninguém diz "não sei" sozinho — "boa pergunta, o/a ___ trabalhou essa parte".
-- Termos técnicos: digam **o quê** antes do **como** (ex.: "para proteger os livros — ou seja,
-  impedir que sejam copiados de graça — fizemos…").
+## Regras de ouro (sem slides, ainda mais importantes)
+- **A app é o vosso slide** — *mostrem*, não só falem. "Reparem aqui…", "vou abrir…".
+- **Falem enquanto navegam** — nunca mexer na app em silêncio de costas para o júri.
+- **Conceitos invisíveis → analogias** (banco, porteiro, cofre). Uma boa imagem mental vale um diagrama.
+- **Sinalizem por voz:** "três coisas: primeira…, segunda…, terceira." Ajuda o júri a seguir sem slides.
+- **Passem a palavra pelo nome:** "para isto, o/a ___".
+- **Sejam honestos** com o estado: o que está feito, feito; o que é desenho, dizem "desenhámos / o próximo passo".
 
 ---
 
 ## 1 · Abertura · Problema · Design — _[Nome 1]_ · 4 min
-**Diapositivos:** capa (nome do grupo) · fluxo de ecrãs (Figura 1) · Figma vs app real.
+**Na app:** deixar a **Home** no ecrã (mas só a mostrar no fim desta parte).
 
-**Fala (guião):**
-- "Bom dia. Somos o grupo ___ e vamos apresentar o **Zuri** — uma aplicação de **leitura digital
-  por subscrição** pensada para o contexto moçambicano."
-- **O problema:** livros são caros e pouco acessíveis; a internet móvel é dispendiosa; e o meio de
-  pagamento que as pessoas usam é o **M-Pesa**, não o cartão de crédito.
-- **A nossa resposta:** uma app instalável **sem loja de aplicações**, que funciona **offline** e
-  se paga por M-Pesa — por cerca de **45 MT/mês**.
-- **Como chegámos ao produto:** começámos no **Figma** — investigação, *wireframes*, sistema de
-  *design* (cores, tipografia, componentes) e um protótipo navegável. As fichas de estilo do
-  Figma passaram directamente para o código, o que deu **fidelidade** entre o desenho e o resultado
-  (mostrar a comparação lado a lado).
-- "Vou passar a palavra ao/à **___**, que vos vai explicar como a app está construída por dentro."
+**Fala:**
+- "Bom dia. Somos o grupo ___ e construímos o **Zuri** — uma app de **leitura digital por
+  subscrição** para o mercado moçambicano."
+- **Problema (contar como história, sem pressa):** "os livros são caros; a internet móvel é cara; e
+  as pessoas pagam por **M-Pesa**, não por cartão. Uma app de leitura para cá tem de nascer barata,
+  funcionar mal-servida de rede, e cobrar por M-Pesa."
+- **Solução:** "uma app que se **instala sem loja**, funciona **offline**, e custa ~45 MT/mês."
+- **Design:** "começámos no **Figma** — estudámos os utilizadores, fizemos os esboços, um sistema de
+  cores e tipografia, e um protótipo clicável. Depois passámos esse desenho directamente para código."
+  → **mostrar a Home na app**: "este é o resultado — reparem na identidade, no tema claro/escuro aqui
+  em cima." (tocar no ☀️/🌙 ao vivo.)
+- "Para explicar como isto funciona por dentro, passo ao/à **___**."
 
-**Dica:** és a cara inicial — postura aberta, ritmo calmo. Vende o **problema** antes da solução;
-o júri tem de sentir que isto resolve algo real.
+**Dica:** és o aquecimento. Vende o **problema** primeiro — o júri tem de sentir que é real. Ao mostrar
+a Home, muda o tema ao vivo: é um "uau" pequeno e imediato.
 
 ---
 
 ## 2 · Arquitectura · Zero-Trust — _[Nome 2]_ · 4 min
-**Diapositivos:** arquitectura em 4 camadas (Figura 2).
+**Sem visual** (ou desenhar 4 caixas no quadro enquanto falas).
 
-**Fala (guião):**
-- "O Zuri organiza-se em **quatro camadas**: o **cliente** (a app no telemóvel), o **controlo de
-  acesso**, os **dados e conteúdo**, e o **pagamento**."
-- **Porquê PWA:** um só código serve telemóvel, *tablet* e computador; instala-se sem loja;
-  actualiza-se instantaneamente. É a decisão que melhor se adapta ao nosso público.
-- **O princípio central — *Zero-Trust*:** "nunca confiamos no cliente". Explicar com uma frase forte:
-  "mesmo que alguém manipule a aplicação no telemóvel, **não consegue** aceder a dados de outros
-  nem activar uma subscrição — porque essas decisões são tomadas no **servidor**, não no telemóvel."
-- Dois exemplos concretos: a autorização é feita **por registo** na base de dados; e o progresso de
-  leitura **nunca pode regredir**, porque o servidor impõe isso.
-- "Sobre como os dados estão organizados e protegidos, passo a palavra ao/à **___**."
+**Fala:**
+- "O Zuri tem **quatro camadas**." (enumera com os dedos / desenha) "**Um:** o telemóvel, a app.
+  **Dois:** o controlo de acesso. **Três:** os dados e os livros. **Quatro:** o pagamento M-Pesa."
+- **Porquê PWA (uma frase forte):** "escolhemos uma *web app* instalável — **um só código** serve
+  telemóvel, tablet e computador, sem loja e com actualização imediata."
+- **Zero-Trust com analogia (o coração desta parte):** "a nossa regra é **nunca confiar no telemóvel**.
+  Pensem num **banco**: o cliente ao balcão pode dizer o que quiser, mas quem decide é o banco, lá
+  dentro. No Zuri é igual — mesmo que alguém mexa na app, **não consegue** ver dados de outros nem
+  activar uma subscrição, porque essas decisões são tomadas no **servidor**."
+- "E os dados? Como garantimos que são mesmo só teus? O/a **___** explica."
 
-**Dica:** esta é a parte "cérebro". Diz o *Zero-Trust* devagar e repete-o — é o conceito que o júri
-vai lembrar. Usa as mãos para desenhar as camadas no ar.
-
----
-
-## 3 · Modelo de dados · segurança de acesso — _[Nome 3]_ · 4 min
-**Diapositivos:** diagrama entidade-relação (Figura 3) · tabela de políticas de acesso.
-
-**Fala (guião):**
-- "O modelo tem **dez entidades** — perfis, catálogo, progresso, subscrições, pagamentos,
-  estatísticas, pedidos de livros e votação, favoritos e notificações."
-- **Isolamento entre utilizadores:** "cada pedido à base de dados só devolve os dados a que o
-  utilizador tem direito. Não há lógica de permissões no telemóvel — está tudo imposto no servidor,
-  ao nível de cada linha." (apontar a tabela: catálogo público; dados pessoais só do próprio;
-  subscrições e pagamentos **não podem ser escritos pelo cliente**.)
-- **Integridade garantida pela base de dados**, independentemente do cliente: o progresso nunca
-  regride (fica sempre o valor máximo); a contagem de votos mantém-se consistente; e criar uma conta
-  inicializa perfil, estatísticas e subscrição de forma atómica.
-- "Um dos pontos mais interessantes é como tratamos o **pagamento e a protecção dos livros** —
-  passo a palavra ao/à **___**."
-
-**Dica:** não leias os nomes das tabelas todos — escolhe 3 e explica a **regra** (isolamento).
-Mostra o diagrama e aponta enquanto falas.
+**Dica:** esta é a parte 'cérebro' e é a que mais se perde sem visual — por isso a analogia do banco é
+o teu diagrama. Di-la devagar e repete "nunca confiar no telemóvel".
 
 ---
 
-## 4 · Pagamento · subscrição · protecção do conteúdo — _[Nome 4]_ · 4,5 min
-**Diapositivos:** sequência do pagamento (Figura 4) · estados da subscrição (Figura 5) · estados do
-conteúdo (Figura 6).
+## 3 · Dados · isolamento por utilizador — _[Nome 3]_ · 4 min
+**Na app:** a **Biblioteca** e o **Perfil** do próprio (mostrar "isto é meu").
 
-**Fala (guião):**
-- **Pagamento M-Pesa:** "seguimos o modelo *Customer-to-Business* da Vodacom. O ponto-chave de
-  segurança: a subscrição **só é activada no servidor**, nunca pelo telemóvel." (percorrer a
-  sequência: pedido → PIN no telemóvel → confirmação → activação → validade de 1 mês.)
-- Ser honesto e seguro: "a **orquestração** está feita; a ligação final ao M-Pesa depende das
-  credenciais de *merchant*, por isso está em **modo controlado** — mas a subscrição já **persiste
-  com validade real** e a activação já é server-side."
-- **Protecção do conteúdo (o nosso destaque técnico):** "de que serve um *paywall* se qualquer um
-  descarrega o livro? No Zuri os ficheiros estão num **armazém privado**; quando abres um livro, um
-  **porteiro no servidor verifica a tua subscrição** e só então entrega um **link temporário** que
-  expira em 2 minutos. Sem subscrição activa, o livro **não abre**."
-- "Mas uma app de leitura tem de funcionar **sem internet** — e sobre isso fala o/a **___**."
+**Fala:**
+- "Por trás há uma base de dados com o catálogo, os utilizadores, o **progresso de leitura**,
+  subscrições, favoritos, estatísticas e notificações."
+- **Isolamento (a ideia-chave):** "a regra de ouro é: **cada um só vê o que é seu**. Isto não está
+  garantido no telemóvel — está imposto na **base de dados**, registo a registo. Mesmo que eu tente
+  pedir os dados de outra pessoa, a base de dados devolve **vazio**." (mostrar a biblioteca/perfil:
+  "estes livros, este progresso, são da minha conta.")
+- **Integridade (exemplo concreto):** "e há regras que a base de dados nunca deixa quebrar — por
+  exemplo, o **progresso de leitura nunca anda para trás**. Se por algum motivo chegasse um valor
+  menor, o servidor **mantém o mais avançado**. Nunca perdes a página onde ias."
+- "Agora, o modelo de negócio — como se paga e como se protege o que é pago. Passo ao/à **___**."
 
-**Dica:** é a parte mais forte tecnicamente. A frase "de que serve um paywall se qualquer um
-descarrega o livro?" é o teu gancho — faz uma pausa depois. Não prometas o que não está feito
-(M-Pesa): diz "modo controlado", com confiança.
+**Dica:** não enumeres tabelas. Conta a **história dos dados de UM utilizador** e martela o
+"cada um só vê o que é seu". Mostrar a app torna-o concreto.
 
 ---
 
-## 5 · Offline · gamificação · partilha — _[Nome 5]_ · 4 min
-**Diapositivos:** sincronização (Figura 7) · gamificação (Figura 8) · ciclo de partilha (Figura 9).
+## 4 · Pagamento · subscrição · segurança do conteúdo — _[Nome 4]_ · 4 min
+**Na app (demo):** o fluxo do **paywall → pagamento → sucesso** (ou explicar se já subscrito).
 
-**Fala (guião):**
-- **Offline-first:** "o utilizador **descarrega** o livro e lê **sem rede** — no avião, no
-  *chapa*, onde não há dados. O progresso guarda-se localmente e sincroniza depois."
-- **Resolução de conflitos:** "se leste offline e havia outra posição no servidor, **fica sempre a
-  mais avançada** — nunca perdes leitura." (regra de monotonia, no cliente e no servidor.)
-- **Gamificação:** experiência, **quatro níveis**, sequência de dias de leitura (*streak*), livros
-  concluídos e horas — para criar **hábito**. Subir de nível gera uma notificação.
-- **Partilha:** cartões visuais com os dados reais do leitor, partilhados pelo menu do telemóvel —
-  um **motor de crescimento** orgânico (partilha → amigos instalam → partilham).
-- "Para fechar, o/a **___** mostra a infraestrutura e a app a funcionar ao vivo."
+**Fala:**
+- **Pagamento M-Pesa:** "a subscrição é mensal e paga-se por **M-Pesa**, seguindo o fluxo da Vodacom:
+  pedes, recebes o **PIN no telemóvel**, confirmas, e a subscrição activa-se **do lado do servidor**."
+  → mostrar na app o ecrã de subscrição/checkout.
+- **Ser honesto:** "no nosso protótipo o pagamento está em **modo simulado** — a integração final com o
+  M-Pesa depende das credenciais de comerciante da Vodacom. Mas o **fluxo e a validade da subscrição**
+  já estão implementados."
+- **Segurança do conteúdo (apresentar como DESENHO, não como demo):** "uma pergunta que nos fizemos:
+  *de que serve cobrar se qualquer um copia o livro?* A nossa resposta de arquitectura é um **porteiro**
+  no servidor — quando abres um livro, o servidor **verifica a subscrição** e só então entrega um
+  **acesso temporário** ao ficheiro. **Desenhámos e prototipámos** este mecanismo; no MVP actual o
+  foco esteve na experiência de leitura, e este reforço de segurança é o **próximo passo**."
+- "Mas uma app de leitura para cá tem de brilhar **sem internet** — e sobre isso, o/a **___**."
 
-**Dica:** esta parte é a mais "simpática" — fala com energia. Liga tudo ao público: dados caros →
-offline; hábito → gamificação; boca-a-boca → partilha.
-
----
-
-## 6 · Infraestrutura · Demo ao vivo · Conclusão — _[Nome 6]_ · 5 min
-**Diapositivos:** implantação/CI-CD (Figura 10) · tabela de capacidade. Depois: **app ao vivo**.
-
-**Fala (guião):**
-- **Infra e custo:** "está tudo em **escalões gratuitos** — zero de custo até à ordem dos 10 000
-  utilizadores. Cada envio de código é publicado automaticamente." (mostrar a Figura 10 rápido.)
-- **Demo (o momento alto — ~2 min):** seguir o guião de demo abaixo.
-- **Conclusão:** "o Zuri mostra que dá para construir um produto **real, seguro e barato** para o
-  nosso mercado: instalável, que funciona offline, com o conteúdo protegido e pago por M-Pesa. Os
-  próximos passos são ligar o M-Pesa de produção e alargar o catálogo. Obrigado."
-
-**Dica:** ensaia a demo **3 vezes**. Tem um **plano B** (capturas de ecrã / vídeo curto) caso a
-internet falhe. Fala enquanto navegas — silêncio a mexer no telemóvel mata a energia.
-
-### Guião da demo (curto e ensaiado)
-1. **No computador:** abrir `zuribook.page` → mostrar a **barra lateral** e a grelha de livros
-   (responsivo). Alternar **claro/escuro** no topo.
-2. **Entrar com Google** (ou já entrado) → abrir um livro → **ler** (virar página com *swipe*).
-3. **No telemóvel** (espelhar se possível): o **mesmo código**, layout de telemóvel, tab bar em baixo.
-4. **Descarregar** um livro → mostrar que fica em "Baixados" (offline).
-5. **Partilhar** um cartão (Wrapped/Streak) → mostrar o menu de partilha.
-6. Frase de fecho enquanto mostras o ecrã principal: "um só código, tudo isto, de graça de manter."
+**Dica:** a frase "*de que serve cobrar se qualquer um copia o livro?*" é o teu gancho — pausa depois.
+Diz "**desenhámos / próximo passo**" com naturalidade; mostra maturidade, não fraqueza.
 
 ---
 
-## Perguntas prováveis & respostas (preparação)
-> Regra: responde quem tem a parte. Se travarem, "passo essa ao/à ___".
+## 5 · Offline · gamificação · partilha — _[Nome 5]_ · 4,5 min
+**Na app (demo, a parte mais visual):** descarregar → ler offline → perfil/stats → gerar um cartão.
 
-| Pergunta do júri | Quem responde | Resposta curta |
+**Fala:**
+- **Offline (mostrar):** "isto é o que mais nos orgulha para o nosso contexto." → num livro, tocar
+  **Baixar** (mostrar a barra), ir a **Baixados**. "Agora — atenção — vou **desligar a internet**…"
+  (activar modo avião no telemóvel) "…e o livro **abre na mesma**." (abrir e virar uma página offline.)
+- **Sem perder leitura:** "o progresso guarda-se no aparelho e sincroniza depois; e fica sempre o
+  ponto **mais avançado**."
+- **Gamificação (mostrar Perfil):** "para criar **hábito** — experiência, **quatro níveis**, dias
+  seguidos de leitura, livros terminados, horas. Subir de nível dá uma notificação." (mostrar o Perfil
+  / Stats detalhados.)
+- **Partilha (mostrar):** "e o crescimento é orgânico — o leitor gera um **cartão** com os seus números
+  reais e partilha pelo menu do telemóvel." → abrir a partilha, mostrar um cartão, tocar **Partilhar**.
+- "Para fechar — onde isto vive e quanto custa — o/a **___**."
+
+**Dica:** é a parte que arranca sorrisos. O momento **modo avião → o livro abre** é o ponto alto de
+toda a defesa — ensaia-o até sair perfeito. Fala com energia.
+
+---
+
+## 6 · Infraestrutura · Responsividade ao vivo · Conclusão — _[Nome 6]_ · 4,5 min
+**Na app (ao vivo):** redimensionar a janela do browser; alternar telemóvel/computador.
+
+**Fala:**
+- **Infra e custo (verbal, curto):** "está tudo em **escalões gratuitos** — **zero de custo** até à
+  ordem dos 10 000 utilizadores. E cada alteração ao código é **publicada automaticamente**."
+- **Responsividade (mostrar, o truque final):** "e é **um só código**." → **arrastar a janela do
+  browser de larga para estreita**: "reparem — no computador tem **barra lateral**; ao estreitar,
+  vira **app de telemóvel** com a barra em baixo. O mesmo código, em qualquer ecrã." (mostrar também
+  no telemóvel a instalar/aberta.)
+- **Conclusão:** "o Zuri mostra que dá para fazer um produto **real, barato e adequado ao nosso
+  mercado** — instalável, offline, pago por M-Pesa. Os próximos passos são o **M-Pesa de produção**,
+  o **reforço da segurança do conteúdo** e **mais catálogo**. Obrigado."
+
+**Dica:** o redimensionar ao vivo é um remate visual forte sem slides — pratica para ser fluido.
+Termina de frente para o júri, não para o ecrã.
+
+---
+
+## Perguntas prováveis & respostas
+> Responde quem tem a parte. Se travarem: "essa parte trabalhou-a o/a ___".
+
+| Pergunta | Quem | Resposta curta (honesta) |
 |---|---|---|
-| Porquê PWA e não app nativa? | 2 / 6 | Um código para tudo, sem loja, actualização instantânea, instalável — ideal para o nosso público e orçamento. |
-| Como impedem a pirataria dos livros? | 4 | Ficheiros em armazém **privado** + porteiro no servidor que verifica subscrição + **link assinado que expira**. |
-| O pagamento M-Pesa funciona mesmo? | 4 | A orquestração e a activação server-side estão feitas; a ligação final depende de credenciais de *merchant* — está em modo controlado, mas a subscrição já é real e com validade. |
-| Um utilizador vê dados de outro? | 3 | Não — autorização **por linha** na base de dados; o cliente não tem poder para isso. |
-| E se editarem o progresso no telemóvel? | 3 / 5 | O servidor impõe **monotonia** — o progresso nunca regride. |
-| Quanto custa? Escala? | 6 | Zero até ~10 000 utilizadores (escalões gratuitos); acima disso, passagem a escalões pagos sem mudar a arquitectura. |
-| Como funciona offline? | 5 | O EPUB é guardado no dispositivo; lê-se sem rede; sincroniza quando volta a internet. |
-| Porquê Supabase/Cloudflare? | 2 / 6 | Base de dados com segurança por linha + armazenamento com saída de dados gratuita, tudo em escalão gratuito durável. |
-| Testaram com utilizadores? | 1 | Protótipo navegável no Figma para validação; a app pública permite testes reais contínuos. |
-| Acessibilidade / idioma? | 1 | Interface **100% em português**; contraste e alvos de toque adequados; tema claro/escuro. |
-| O que fariam a seguir? | 6 | M-Pesa de produção, mais catálogo, notificações *push* e observabilidade. |
+| Porquê PWA e não app nativa? | 2 / 6 | Um código para tudo, sem loja, actualização imediata, instalável — ideal para o público e o orçamento. |
+| O pagamento M-Pesa funciona mesmo? | 4 | O fluxo e a validade da subscrição estão feitos; a ligação final ao M-Pesa depende de credenciais de comerciante — está em modo simulado. |
+| Como impedem a cópia dos livros? | 4 | **Desenhámos** um porteiro no servidor (acesso ao ficheiro só a subscritores, por link temporário); é o próximo reforço — no MVP o foco foi a leitura. |
+| Um utilizador vê dados de outro? | 3 | Não — o isolamento é imposto na base de dados, registo a registo; o telemóvel não tem esse poder. |
+| E se editarem o progresso no telemóvel? | 3 / 5 | O servidor garante que **nunca regride** — fica sempre o mais avançado. |
+| Como funciona offline? | 5 | O livro é guardado no aparelho; lê-se sem rede; sincroniza quando a internet volta. (E mostrámos ao vivo.) |
+| Quanto custa? Escala? | 6 | Zero até ~10 000 utilizadores (escalões gratuitos); acima disso, passa a escalões pagos sem mudar a arquitectura. |
+| Testaram com utilizadores? | 1 | Protótipo clicável no Figma para validar; a app está pública, o que permite testes reais. |
+| Idioma / acessibilidade? | 1 | 100% em português; contraste, alvos de toque e tema claro/escuro. |
+| O que fariam a seguir? | 6 | M-Pesa de produção, segurança do conteúdo, notificações *push*, mais catálogo. |
 
 ---
 
-## Frase de encerramento (grupo)
-> _[Nome 6]_ termina; todos ficam de frente para o júri:
-> **"O Zuri já está online, instalável e a funcionar. Estamos disponíveis para as vossas perguntas. Obrigado."**
+## Encerramento (grupo)
+> _[Nome 6]_ termina; todos de frente para o júri:
+> **"O Zuri está online, instalável e a funcionar — acabaram de o ver ao vivo. Ficamos para as vossas perguntas. Obrigado."**
 
-**Antes de entrar:** app aberta nos dois ecrãs · plano B pronto · cada um sabe a sua primeira e
-última frase de cor · combinar quem controla os diapositivos.
+**Checklist final antes de entrar:** app aberta nos dois ecrãs · subscrição activa · um livro
+descarregado · modo avião testado · cada um sabe a 1ª e a última frase · plano B (capturas) no bolso.
