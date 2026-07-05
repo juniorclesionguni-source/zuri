@@ -1,7 +1,7 @@
 import { ZuriMark } from '../../../components/ui/ZuriMark'
 import { BookCover } from '../../../components/ui/BookCover'
 
-export function CardWrapped({ month = 'SETEMBRO', stats = { books: 23, hours: 164, streak: 14 }, book = { title: 'Terra Sonâmbula', author: 'Mia Couto' } }: { month?: string; stats?: { books: number; hours: number; streak: number }; book?: { title: string; author: string } }) {
+export function CardWrapped({ month = 'SETEMBRO', stats = { books: 23, hours: 164, streak: 14 }, book = { title: 'Terra Sonâmbula', author: 'Mia Couto' } }: { month?: string; stats?: { books: number; hours: number; streak: number }; book?: { title: string; author: string; cover_url?: string } }) {
   const rows = [
     ['Livros lidos', String(stats.books)],
     ['Horas de leitura', `${stats.hours}h`],
@@ -27,7 +27,7 @@ export function CardWrapped({ month = 'SETEMBRO', stats = { books: 23, hours: 16
       </div>
 
       <div style={{ marginTop: 80, padding: 60, borderRadius: 32, background: 'rgba(254,248,245,0.12)', display: 'flex', gap: 40, alignItems: 'center' }}>
-        <BookCover title={book.title} author={book.author} w={140} h={210} />
+        <BookCover title={book.title} author={book.author} coverUrl={book.cover_url} w={140} h={210} />
         <div>
           <div style={{ fontFamily: 'var(--sans)', fontSize: 28, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(254,248,245,0.7)' }}>Livro do mês</div>
           <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 52, color: '#FEF8F5', marginTop: 10, lineHeight: 1.1 }}>{book.title}</div>

@@ -1,13 +1,13 @@
 import { BookCover } from '../../../components/ui/BookCover'
 import { ZuriMark } from '../../../components/ui/ZuriMark'
 
-export function CardBookFinished({ book = { title: 'Terra Sonâmbula', author: 'Mia Couto' }, rating = 5 }: { book?: { title: string; author: string }; rating?: number }) {
+export function CardBookFinished({ book = { title: 'Terra Sonâmbula', author: 'Mia Couto' }, rating = 5 }: { book?: { title: string; author: string; cover_url?: string }; rating?: number }) {
   return (
     <div style={{ width: 1080, height: 1920, background: '#28231C', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 100, boxSizing: 'border-box', position: 'relative' }}>
       <div style={{ position: 'absolute', top: 90, left: 90 }}><ZuriMark size={52} color="#D8B880" stroke={2} /></div>
       <div style={{ position: 'absolute', top: 90, right: 90, fontFamily: 'var(--sans)', fontSize: 32, fontWeight: 700, letterSpacing: '0.15em', color: 'rgba(216,184,128,0.5)' }}>TERMINEI</div>
 
-      <BookCover title={book.title} author={book.author} w={420} h={630} />
+      <BookCover title={book.title} author={book.author} coverUrl={book.cover_url} w={420} h={630} />
 
       <div style={{ marginTop: 80, textAlign: 'center' }}>
         <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 72, color: '#FEF8F5', lineHeight: 1.05 }}>{book.title}</div>

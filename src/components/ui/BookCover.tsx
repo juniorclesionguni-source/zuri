@@ -75,6 +75,7 @@ export function BookCover({ title, author, genre = '', coverUrl, w = 100, h = 15
         <img
           src={coverUrl}
           alt={title}
+          crossOrigin="anonymous"
           onError={() => setImgFailed(true)}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />

@@ -50,7 +50,7 @@ export function ShareModal({ initialKind = 'wrapped', onClose }: { initialKind?:
     books.find((b) => b.id === finishedId) ??
     books.find((b) => b.id === byRecent[0]?.[0]) ??
     books[0]
-  const featBook = { title: featured?.title ?? 'Zuri', author: featured?.author ?? '' }
+  const featBook = { title: featured?.title ?? 'Zuri', author: featured?.author ?? '', cover_url: featured?.cover_url }
   const monthPT = new Date().toLocaleString('pt-PT', { month: 'long' }).toUpperCase()
 
   const propsFor = (k: string): Record<string, unknown> => {
