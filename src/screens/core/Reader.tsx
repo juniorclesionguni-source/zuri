@@ -4,7 +4,7 @@ import { Icon } from '../../components/ui/Icon'
 import { ReaderSettings } from './ReaderSettings'
 import { useCatalog } from '../../store/catalog'
 import { useAuthStore } from '../../store/auth'
-import { saveProgress, getProgress, logSession } from '../../data/db'
+import { saveProgress, getProgress, logSession, getOfflineBook } from '../../data/db'
 import { progress as progressApi } from '../../data/services'
 
 const THEMES: Record<string, { bg: string; text: string }> = {
@@ -81,7 +81,9 @@ export function Reader() {
     ;(async () => {
       try {
         const ePub = (await import('epubjs')).default
-        epubInstance = ePub(book!.epub_path!)
+        // Se o livro foi descarregado, abre do blob local (funciona offline); senão do URL.
+        const offline = id ? await getOfflineBook(id) : undefined
+        epubInstance = ePub(offline?.data ?? book!.epub_path!)
         epubRef.current = epubInstance
 
         renditionInstance = epubInstance.renderTo(containerRef.current!, {

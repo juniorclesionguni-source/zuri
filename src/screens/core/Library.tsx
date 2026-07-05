@@ -22,17 +22,21 @@ export function Library() {
   const books = useCatalog((s) => s.books)
   const progress = useLibrary((s) => s.progress)
   const favorites = useLibrary((s) => s.favorites)
+  const downloads = useLibrary((s) => s.downloads)
 
   const inProgress = books.filter((b) => { const p = progress[b.id]; return p && p.pct > 0 && p.pct < 95 })
   const finished   = books.filter((b) => { const p = progress[b.id]; return p && (p.pct >= 95 || p.finished) })
   const unread     = books.filter((b) => !progress[b.id])
   const favBooks   = books.filter((b) => favorites.has(b.id))
+  const downloadedBooks = books.filter((b) => downloads[b.id])
+  const totalMb = Object.values(downloads).reduce((s, d) => s + d.sizeMb, 0)
 
   const ITEMS: Record<string, Book[]> = {
     'A ler':      inProgress,
     'Por ler':    unread,
     'Terminados': finished,
     'Favoritos':  favBooks,
+    'Baixados':   downloadedBooks,
   }
 
   // Livros únicos na estante (com progresso + favoritos)
@@ -45,7 +49,7 @@ export function Library() {
       <div style={{ padding: '60px 20px 0' }}>
         <h1 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 32, color: 'var(--text)', margin: 0 }}>My Zuri</h1>
         <p style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--text3)', margin: '4px 0 0' }}>
-          {tab === 'Baixados' ? 'Ainda sem downloads' : `${shelfCount} livros na tua estante`}
+          {tab === 'Baixados' ? `${downloadedBooks.length} offline · ${totalMb.toFixed(1)} MB` : `${shelfCount} livros na tua estante`}
         </p>
       </div>
 
@@ -68,12 +72,7 @@ export function Library() {
         </div>
       )}
 
-      {tab === 'Baixados' ? (
-        <div style={{ padding: '60px 20px', textAlign: 'center' }}>
-          <Icon name="download" size={40} color="var(--text3)" strokeWidth={1} />
-          <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text3)', marginTop: 16 }}>Ainda sem downloads</p>
-        </div>
-      ) : list.length === 0 ? (
+      {list.length === 0 ? (
         <div style={{ padding: '60px 20px', textAlign: 'center' }}>
           <Icon name="book-open" size={40} color="var(--text3)" strokeWidth={1} />
           <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text3)', marginTop: 16 }}>{EMPTY[tab]}</p>

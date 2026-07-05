@@ -17,7 +17,13 @@ export const useCatalog = create<CatalogState>()((set, get) => ({
     set({ loading: true })
     // import() dinâmico: mantém o @supabase/supabase-js fora do chunk inicial.
     const { fetchBooks } = await import('../data/api/catalog')
-    const books = await fetchBooks()
+    const dbmod = await import('../data/db')
+    let books = await fetchBooks()
+    if (books.length) {
+      dbmod.cacheBooks(books).catch(() => {}) // guarda para uso offline
+    } else {
+      books = await dbmod.getCachedBooks().catch(() => []) // offline: usa a cache
+    }
     set({ books, loaded: true, loading: false })
   },
 }))

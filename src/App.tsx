@@ -118,7 +118,11 @@ export default function App() {
   }, [hydrate])
 
   // Catálogo: leitura pública, carrega logo no arranque independente de login.
-  useEffect(() => { useCatalog.getState().load() }, [])
+  // Downloads offline: não dependem de login (chave = bookId), carrega já.
+  useEffect(() => {
+    useCatalog.getState().load()
+    useLibrary.getState().loadDownloads()
+  }, [])
 
   // Stats: carrega do servidor quando o utilizador faz login.
   useEffect(() => {

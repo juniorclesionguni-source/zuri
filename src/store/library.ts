@@ -5,15 +5,20 @@ interface ProgressEntry { pct: number; finished: boolean; updatedAt: number }
 interface LibraryState {
   progress: Record<string, ProgressEntry>
   favorites: Set<string>
+  downloads: Record<string, { sizeMb: number }>
   loaded: boolean
   loadProgress: (userId: string) => Promise<void>
   loadFavorites: (userId: string) => Promise<void>
   toggleFavorite: (userId: string, bookId: string) => Promise<void>
+  loadDownloads: () => Promise<void>
+  download: (bookId: string, url: string, onProgress?: (pct: number) => void) => Promise<void>
+  removeDownload: (bookId: string) => Promise<void>
 }
 
 export const useLibrary = create<LibraryState>()((set, get) => ({
   progress: {},
   favorites: new Set(),
+  downloads: {},
   loaded: false,
 
   loadProgress: async (userId) => {
@@ -69,5 +74,27 @@ export const useLibrary = create<LibraryState>()((set, get) => ({
       // Rollback on error
       set({ favorites })
     }
+  },
+
+  loadDownloads: async () => {
+    try {
+      const { listOfflineBooks } = await import('../data/db')
+      const list = await listOfflineBooks()
+      const d: Record<string, { sizeMb: number }> = {}
+      list.forEach((o) => { d[o.bookId] = { sizeMb: o.sizeMb } })
+      set({ downloads: d })
+    } catch { /* sem downloads */ }
+  },
+
+  download: async (bookId, url, onProgress) => {
+    const { saveOfflineBook } = await import('../data/db')
+    const bytes = await saveOfflineBook(bookId, url, onProgress)
+    set((s) => ({ downloads: { ...s.downloads, [bookId]: { sizeMb: bytes / 1048576 } } }))
+  },
+
+  removeDownload: async (bookId) => {
+    const { removeOfflineBook } = await import('../data/db')
+    await removeOfflineBook(bookId)
+    set((s) => { const d = { ...s.downloads }; delete d[bookId]; return { downloads: d } })
   },
 }))

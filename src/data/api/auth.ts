@@ -50,9 +50,12 @@ export async function signInWithGoogle(): Promise<void> {
 // Hidratação: emite o utilizador actual à entrada e em cada mudança de sessão
 // (refresh de token, login/logout noutro separador). Devolve uma função de unsubscribe.
 export function subscribe(onUser: (u: AuthUser | null) => void): () => void {
-  getProfile().then(onUser).catch(() => onUser(null))
+  // Online comporta-se como antes. Offline (navigator.onLine === false): um erro de
+  // rede NÃO limpa a sessão persistida — a app abre e lê offline.
+  getProfile().then(onUser).catch(() => { if (navigator.onLine) onUser(null) })
   const { data } = supabase!.auth.onAuthStateChange(async (_event, session) => {
-    onUser(session ? await getProfile() : null)
+    if (!session) { onUser(null); return }
+    try { onUser(await getProfile()) } catch { if (navigator.onLine) onUser(null) }
   })
   return () => data.subscription.unsubscribe()
 }

@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import type { Book } from './catalog'
 
 interface ReadingProgress {
   id?: number
@@ -13,6 +14,7 @@ interface ReadingProgress {
 interface OfflineBook {
   bookId: string
   path: string
+  data: ArrayBuffer // o EPUB inteiro, para ler offline
   sizeMb: number
   downloadedAt: number
 }
@@ -27,13 +29,8 @@ interface ReadingSession {
   day: string // 'YYYY-MM-DD' local
 }
 
-interface BookCache {
-  id: string
-  title: string
-  author: string
-  genre: string
-  cachedAt: number
-}
+// Catálogo completo em cache para funcionar offline.
+type BookCache = Book & { cachedAt: number }
 
 class ZuriDB extends Dexie {
   readingProgress!: Table<ReadingProgress>
@@ -117,4 +114,59 @@ export async function getDailyMinutes(userId: string, days: number): Promise<Rec
 export async function getTotalMinutes(userId: string): Promise<number> {
   const all = await db.readingSessions.where({ userId }).toArray()
   return all.reduce((sum, s) => sum + (s.minutes ?? 0), 0)
+}
+
+// ── catálogo em cache (offline) ─────────────────────────────────────────────────
+
+export async function cacheBooks(books: Book[]): Promise<void> {
+  const now = Date.now()
+  await db.booksCache.bulkPut(books.map((b) => ({ ...b, cachedAt: now })))
+}
+
+export async function getCachedBooks(): Promise<Book[]> {
+  // BookCache estende Book — o cachedAt extra é inofensivo.
+  return db.booksCache.toArray()
+}
+
+// ── livros offline (EPUB guardado) ──────────────────────────────────────────────
+
+/** Descarrega o EPUB e guarda-o em IndexedDB. onProgress recebe 0–100 se houver content-length. */
+export async function saveOfflineBook(bookId: string, url: string, onProgress?: (pct: number) => void): Promise<number> {
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`download falhou (${res.status})`)
+  const total = Number(res.headers.get('content-length')) || 0
+  const reader = res.body?.getReader()
+  const chunks: Uint8Array[] = []
+  let received = 0
+  if (reader) {
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
+      received += value.length
+      if (total && onProgress) onProgress(Math.min(99, Math.round((received / total) * 100)))
+    }
+  } else {
+    const buf = await res.arrayBuffer()
+    chunks.push(new Uint8Array(buf))
+    received = buf.byteLength
+  }
+  const merged = new Uint8Array(received)
+  let off = 0
+  for (const c of chunks) { merged.set(c, off); off += c.length }
+  await db.offlineBooks.put({ bookId, path: url, data: merged.buffer, sizeMb: received / 1048576, downloadedAt: Date.now() })
+  if (onProgress) onProgress(100)
+  return received
+}
+
+export async function getOfflineBook(bookId: string): Promise<OfflineBook | undefined> {
+  return db.offlineBooks.get(bookId)
+}
+
+export async function listOfflineBooks(): Promise<OfflineBook[]> {
+  return db.offlineBooks.toArray()
+}
+
+export async function removeOfflineBook(bookId: string): Promise<void> {
+  await db.offlineBooks.delete(bookId)
 }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { BookCover } from '../../components/ui/BookCover'
 import { Chip } from '../../components/ui/Chip'
@@ -20,6 +21,10 @@ export function BookDetail() {
   const book = books.find((b) => b.id === id)
   const isFav = useLibrary((s) => s.favorites.has(id ?? ''))
   const toggleFavorite = useLibrary((s) => s.toggleFavorite)
+  const downloaded = useLibrary((s) => s.downloads[id ?? ''])
+  const downloadBook = useLibrary((s) => s.download)
+  const removeDownload = useLibrary((s) => s.removeDownload)
+  const [dlPct, setDlPct] = useState<number | null>(null)
 
   if (!loaded) {
     return (
@@ -45,6 +50,15 @@ export function BookDetail() {
 
   const handleFav = () => {
     if (user) toggleFavorite(user.id, book.id)
+  }
+
+  const handleDownload = async () => {
+    if (!book.epub_path || dlPct !== null) return
+    setDlPct(0)
+    try {
+      await downloadBook(book.id, book.epub_path, (p) => setDlPct(p))
+    } catch { /* falha silenciosa */ }
+    finally { setDlPct(null) }
   }
 
   return (
@@ -88,6 +102,26 @@ export function BookDetail() {
         <GhostButton onClick={handleFav}>
           {isFav ? '✓ Na biblioteca' : '+ Adicionar à biblioteca'}
         </GhostButton>
+
+        {/* Download offline */}
+        {downloaded ? (
+          <button onClick={() => removeDownload(book.id)} style={{ height: 44, borderRadius: 12, border: '1px solid var(--border)', background: 'transparent', fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 600, color: 'var(--text3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <Icon name="check" size={16} color="var(--success)" strokeWidth={2.5} /> Baixado ({downloaded.sizeMb.toFixed(1)} MB) · remover
+          </button>
+        ) : dlPct !== null ? (
+          <div style={{ height: 44, borderRadius: 12, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 14px', gap: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text2)' }}>
+              <span>A baixar…</span><span>{dlPct}%</span>
+            </div>
+            <div style={{ height: 3, background: 'var(--border)', borderRadius: 2 }}>
+              <div style={{ width: `${dlPct}%`, height: '100%', background: 'var(--accent)', borderRadius: 2, transition: 'width 0.2s' }} />
+            </div>
+          </div>
+        ) : (
+          <button onClick={handleDownload} style={{ height: 44, borderRadius: 12, border: '1px solid var(--border)', background: 'transparent', fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 600, color: 'var(--text2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <Icon name="download" size={16} color="var(--text2)" strokeWidth={2} /> Baixar para ler offline
+          </button>
+        )}
       </div>
 
       {/* Sobre */}
