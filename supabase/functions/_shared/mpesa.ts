@@ -7,23 +7,23 @@
 //
 // Docs: https://developer.mpesa.vm.co.mz  (C2B Single Stage Payment)
 
+import { KEYUTIL, KJUR, hextob64 } from 'https://esm.sh/jsrsasign@11.1.0'
+
 const BASE = Deno.env.get('MPESA_BASE') ?? 'https://api.sandbox.vm.co.mz:18352'
 const API_KEY = Deno.env.get('MPESA_API_KEY') ?? ''
 const PUBLIC_KEY = Deno.env.get('MPESA_PUBLIC_KEY') ?? '' // chave pública do ambiente (base64, sem cabeçalhos PEM)
 const SERVICE_PROVIDER = Deno.env.get('MPESA_SERVICE_PROVIDER_CODE') ?? '' // shortcode do merchant
 const ORIGIN = Deno.env.get('MPESA_ORIGIN') ?? 'developer.mpesa.vm.co.mz'
 
-// O Bearer do M-Pesa é a API key cifrada com RSA (chave pública do ambiente),
-// em base64. TODO: confirmar o padding esperado (a doc usa RSA PKCS#1 v1.5).
-async function bearerToken(): Promise<string> {
-  const keyDer = Uint8Array.from(atob(PUBLIC_KEY), (c) => c.charCodeAt(0))
-  const pub = await crypto.subtle.importKey(
-    'spki', keyDer,
-    { name: 'RSA-OAEP', hash: 'SHA-256' }, // TODO: validar — M-Pesa pode exigir RSAES-PKCS1-v1_5
-    false, ['encrypt'],
-  )
-  const enc = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, pub, new TextEncoder().encode(API_KEY))
-  return btoa(String.fromCharCode(...new Uint8Array(enc)))
+// O Bearer do M-Pesa é a API key cifrada com a chave pública do ambiente em
+// RSAES-PKCS1-v1_5, base64. O WebCrypto do Deno só encripta com RSA-OAEP, por
+// isso jsrsasign ('RSA' = PKCS#1 v1.5).
+function bearerToken(): string {
+  const pem = `-----BEGIN PUBLIC KEY-----\n${PUBLIC_KEY}\n-----END PUBLIC KEY-----`
+  const pub = KEYUTIL.getKey(pem)
+  // deno-lint-ignore no-explicit-any
+  const encHex = KJUR.crypto.Cipher.encrypt(API_KEY, pub as any, 'RSA')
+  return hextob64(encHex)
 }
 
 export interface C2BResult {
@@ -36,7 +36,9 @@ export async function c2bPayment(args: { phone: string; amount: number; referenc
   if (!API_KEY || !PUBLIC_KEY || !SERVICE_PROVIDER) {
     return { ok: false, raw: { error: 'M-Pesa não configurado (env em falta)' } }
   }
-  const token = await bearerToken()
+  const msisdn = normalizeMsisdn(args.phone)
+  if (!msisdn) return { ok: false, raw: { error: 'invalid_phone' } }
+  const token = bearerToken()
   const res = await fetch(`${BASE}/ipg/v1x/c2bPayment/singleStage/`, {
     method: 'POST',
     headers: {
@@ -46,7 +48,7 @@ export async function c2bPayment(args: { phone: string; amount: number; referenc
     },
     body: JSON.stringify({
       input_TransactionReference: args.reference,
-      input_CustomerMSISDN: normalizeMsisdn(args.phone),
+      input_CustomerMSISDN: msisdn,
       input_Amount: String(args.amount),
       input_ThirdPartyReference: args.reference,
       input_ServiceProviderCode: SERVICE_PROVIDER,
@@ -58,9 +60,9 @@ export async function c2bPayment(args: { phone: string; amount: number; referenc
   return { ok, raw }
 }
 
-// 84/85xxxxxxx -> 25884xxxxxxx
-export function normalizeMsisdn(phone: string): string {
-  const d = phone.replace(/\D/g, '')
-  if (d.startsWith('258')) return d
-  return '258' + d.replace(/^0+/, '')
+// 84/85xxxxxxx -> 25884xxxxxxx. M-Pesa é só Vodacom (84/85); devolve null se inválido.
+export function normalizeMsisdn(phone: string): string | null {
+  let d = phone.replace(/\D/g, '').replace(/^0+/, '')
+  if (!d.startsWith('258')) d = '258' + d
+  return /^258(84|85)\d{7}$/.test(d) ? d : null
 }

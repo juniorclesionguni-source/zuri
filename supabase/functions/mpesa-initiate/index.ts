@@ -2,7 +2,7 @@
 // Cria o registo de pagamento, marca a subscrição 'pending' e dispara o STK push.
 // A ACTIVAÇÃO acontece depois, no callback — nunca aqui, nunca no cliente.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { c2bPayment } from '../_shared/mpesa.ts'
+import { c2bPayment, normalizeMsisdn } from '../_shared/mpesa.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
   if (!authHeader) return json({ error: 'unauthorized' }, 401)
 
   const { phone } = await req.json().catch(() => ({}))
-  if (!phone) return json({ error: 'phone obrigatório' }, 400)
+  if (!phone || !normalizeMsisdn(String(phone))) return json({ error: 'invalid_phone' }, 400)
 
   // Identifica o utilizador a partir do JWT (não confiamos num user_id do corpo).
   const userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: authHeader } } })

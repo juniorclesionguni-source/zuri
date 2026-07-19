@@ -6,10 +6,11 @@ export interface AuthUser {
   email: string
   genres: string[]
   created_at?: string
+  is_admin?: boolean
 }
 
 async function fetchProfile(id: string) {
-  const { data } = await supabase!.from('profiles').select('name, genres, created_at').eq('id', id).single()
+  const { data } = await supabase!.from('profiles').select('name, genres, created_at, is_admin').eq('id', id).single()
   return data
 }
 
@@ -18,7 +19,7 @@ export async function signIn(email: string, password: string): Promise<{ user: A
   if (error || !data.user) throw error ?? new Error('Login falhou')
   const p = await fetchProfile(data.user.id)
   return {
-    user: { id: data.user.id, email: data.user.email ?? email, name: p?.name ?? '', genres: p?.genres ?? [], created_at: p?.created_at },
+    user: { id: data.user.id, email: data.user.email ?? email, name: p?.name ?? '', genres: p?.genres ?? [], created_at: p?.created_at, is_admin: p?.is_admin ?? false },
     jwt: data.session?.access_token ?? '',
   }
 }
@@ -27,7 +28,7 @@ export async function getProfile(): Promise<AuthUser | null> {
   const { data: { user } } = await supabase!.auth.getUser()
   if (!user) return null
   const p = await fetchProfile(user.id)
-  return { id: user.id, email: user.email ?? '', name: p?.name ?? '', genres: p?.genres ?? [], created_at: p?.created_at }
+  return { id: user.id, email: user.email ?? '', name: p?.name ?? '', genres: p?.genres ?? [], created_at: p?.created_at, is_admin: p?.is_admin ?? false }
 }
 
 export async function setGenres(genres: string[]): Promise<void> {

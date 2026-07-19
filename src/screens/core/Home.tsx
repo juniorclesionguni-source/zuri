@@ -15,6 +15,9 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const books = useCatalog((s) => s.books)
+  const catalogLoading = useCatalog((s) => s.loading)
+  const catalogError = useCatalog((s) => s.error)
+  const retry = useCatalog((s) => s.retry)
   const progress = useLibrary((s) => s.progress)
   const unread = useNotifications((s) => s.unread)
   const dark = useUIStore((s) => s.dark)
@@ -90,13 +93,29 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
       </div>
       )}
 
+      {/* Catálogo indisponível (sem rede e sem cache) */}
+      {catalogError && books.length === 0 && (
+        <div style={{ margin: '32px 20px 0', padding: '22px 20px', background: 'var(--bg2)', borderRadius: 16, textAlign: 'center' }}>
+          <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text2)', margin: '0 0 12px' }}>Não foi possível carregar o catálogo. Verifica a tua ligação.</p>
+          <button onClick={() => retry()} style={{ fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 700, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer' }}>Tentar de novo</button>
+        </div>
+      )}
+
       {/* Sugestões */}
       <div style={{ marginTop: 32 }}>
         <SectionHeader action="Ver tudo">Sugestões para ti</SectionHeader>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 20, padding: '0 20px' }}>
-          {books.slice(1, 5).map((b) => (
-            <BookCard key={b.id} book={b} onClick={() => navigate(`/book/${b.id}`)} fluid />
-          ))}
+          {catalogLoading && books.length === 0
+            ? [0, 1, 2, 3].map((i) => (
+                <div key={i}>
+                  <div style={{ aspectRatio: '2/3', borderRadius: 10, background: 'var(--bg2)' }} />
+                  <div style={{ height: 12, width: '80%', borderRadius: 4, background: 'var(--bg2)', marginTop: 10 }} />
+                  <div style={{ height: 10, width: '55%', borderRadius: 4, background: 'var(--bg2)', marginTop: 6 }} />
+                </div>
+              ))
+            : books.slice(1, 5).map((b) => (
+                <BookCard key={b.id} book={b} onClick={() => navigate(`/book/${b.id}`)} fluid />
+              ))}
         </div>
       </div>
 

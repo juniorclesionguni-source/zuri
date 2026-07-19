@@ -5,7 +5,7 @@ import { PrimaryButton } from '../../components/ui/Button'
 const SLIDES = [
   {
     title: 'Livros que cabem no teu bolso',
-    sub: 'Milhares de livros, sempre contigo.',
+    sub: 'Os teus livros, sempre contigo.',
   },
   {
     title: 'Lê, ganha XP, sobe de nível',

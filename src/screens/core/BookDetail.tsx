@@ -7,9 +7,11 @@ import { PrimaryButton, GhostButton } from '../../components/ui/Button'
 import { SectionHeader } from '../../components/ui/SectionHeader'
 import { Icon } from '../../components/ui/Icon'
 import { useCatalog } from '../../store/catalog'
-import { useSubStore } from '../../store/subscription'
+import { useSubStore, canReadOffline, graceEndsAt, formatExpiresAt } from '../../store/subscription'
 import { useAuthStore } from '../../store/auth'
 import { useLibrary } from '../../store/library'
+import { isSupabaseConfigured } from '../../lib/supabaseConfig'
+import { content } from '../../data/services'
 
 export function BookDetail() {
   const { id } = useParams<{ id: string }>()
@@ -43,10 +45,8 @@ export function BookDetail() {
     )
   }
 
-  const handleRead = () => {
-    if (status !== 'active') navigate('/paywall')
-    else navigate(`/reader/${book.id}`)
-  }
+  // Amostra grátis: qualquer utilizador abre o reader; o cap do 1º capítulo é lá.
+  const handleRead = () => navigate(`/reader/${book.id}`)
 
   const handleFav = () => {
     if (user) toggleFavorite(user.id, book.id)
@@ -54,9 +54,14 @@ export function BookDetail() {
 
   const handleDownload = async () => {
     if (!book.epub_path || dlPct !== null) return
+    if (status !== 'active') { navigate('/paywall'); return } // download é para subscritores
     setDlPct(0)
     try {
-      await downloadBook(book.id, book.epub_path, (p) => setDlPct(p))
+      // Com backend, o bucket é privado — pedir URL assinado; em mock usa o path directo.
+      const url = isSupabaseConfigured
+        ? (await content.getBookUrl(book.id)).url
+        : book.epub_path
+      await downloadBook(book.id, url, (p) => setDlPct(p))
     } catch { /* falha silenciosa */ }
     finally { setDlPct(null) }
   }
@@ -81,9 +86,9 @@ export function BookDetail() {
       {/* Metadata */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 22, padding: '0 20px', marginBottom: 24 }}>
         {[
-          { val: String(book.pages), label: 'páginas' },
-          { val: `${Math.round(book.mins / 60)}h`, label: 'leitura' },
-          { val: String(book.rating), label: 'rating', icon: true },
+          { val: book.pages > 0 ? String(book.pages) : '—', label: 'páginas', icon: false },
+          { val: book.mins >= 60 ? `${Math.round(book.mins / 60)}h` : book.mins > 0 ? `${book.mins} min` : '—', label: 'leitura', icon: false },
+          ...(book.rating > 0 ? [{ val: String(book.rating), label: 'rating', icon: true }] : []),
         ].map((m, i) => (
           <div key={m.label} style={{ display: 'flex', alignItems: 'center', gap: i > 0 ? 22 : 0 }}>
             {i > 0 && <div style={{ width: 1, background: 'var(--border)', height: 32, alignSelf: 'center' }} />}
@@ -98,7 +103,16 @@ export function BookDetail() {
       </div>
 
       <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <PrimaryButton onClick={handleRead}>Começar a ler</PrimaryButton>
+        <PrimaryButton onClick={handleRead}>
+          {status === 'active' ? 'Começar a ler'
+            : downloaded && canReadOffline() ? 'Continuar a ler (offline)'
+            : 'Ler o primeiro capítulo grátis'}
+        </PrimaryButton>
+        {status !== 'active' && downloaded && canReadOffline() && (
+          <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text3)', textAlign: 'center' }}>
+            Subscrição expirada — leitura offline até {formatExpiresAt(graceEndsAt())}.
+          </div>
+        )}
         <GhostButton onClick={handleFav}>
           {isFav ? '✓ Na biblioteca' : '+ Adicionar à biblioteca'}
         </GhostButton>

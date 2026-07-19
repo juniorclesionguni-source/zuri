@@ -20,8 +20,11 @@ export const progress = {
   get: async (u: string, b: string) => (await import('./api/progress')).getProgress(u, b),
 }
 
-// ponytail: pronto mas o consumidor (Checkout/Processing) só liga quando o worker existir.
+export const content = {
+  getBookUrl: async (bookId: string) => (await import('./api/content')).getBookUrl(bookId),
+}
+
 export const mpesa = {
-  initiate: async (phone: string, amount: number) => (await import('./api/mpesa')).initiatePayment(phone, amount),
+  initiate: async (phone: string) => (await import('./api/mpesa')).initiatePayment(phone),
   poll: async (tx: string) => (await import('./api/mpesa')).pollPayment(tx),
 }

@@ -36,11 +36,12 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE)
 
-  // 2) Exige subscrição activa e dentro da validade.
+  // 2) Subscrição activa = livro completo; sem subscrição = amostra (o cliente
+  // limita ao 1º capítulo). ponytail: o cap da amostra é client-side — o ficheiro
+  // completo desce na mesma; DRM server-side não se justifica para este preço.
   const { data: sub } = await admin.from('subscriptions')
     .select('status, expires_at').eq('user_id', user.id).maybeSingle()
   const active = sub?.status === 'active' && sub.expires_at && new Date(sub.expires_at) > new Date()
-  if (!active) return json({ error: 'subscription_required' }, 403)
 
   // 3) Resolve o nome do ficheiro a partir do id do livro.
   const { data: book } = await admin.from('books').select('epub_path').eq('id', bookId).maybeSingle()
@@ -52,5 +53,5 @@ Deno.serve(async (req) => {
   target.searchParams.set('X-Amz-Expires', '120')
   const signed = await r2.sign(target.toString(), { method: 'GET', aws: { signQuery: true } })
 
-  return json({ url: signed.url })
+  return json({ url: signed.url, sample: !active })
 })

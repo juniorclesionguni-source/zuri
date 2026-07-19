@@ -23,7 +23,7 @@ export function Paywall() {
       </div>
 
       <h1 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 36, color: 'var(--text)', margin: '20px 0 10px', lineHeight: 1.1 }}>Lê sem<br/>limites.</h1>
-      <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--text2)', margin: '0 0 32px' }}>Milhares de livros por 45 MT/mês.</p>
+      <p style={{ fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--text2)', margin: '0 0 32px' }}>Livros escolhidos a dedo, de autores moçambicanos e do mundo. 45 MT/mês.</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginBottom: 32 }}>
         {BENEFITS.map((b) => (

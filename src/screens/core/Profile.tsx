@@ -4,7 +4,7 @@ import { Icon } from '../../components/ui/Icon'
 import { useAuthStore } from '../../store/auth'
 import { useStatsStore } from '../../store/stats'
 import { useUIStore } from '../../store/ui'
-import { useSubStore } from '../../store/subscription'
+import { useSubStore, formatExpiresAt } from '../../store/subscription'
 import { LEVELS } from '../../data/catalog'
 
 function localDay(ts: number): string {
@@ -121,7 +121,7 @@ export function Profile({ onLevelUp, onShare }: { onLevelUp: () => void; onShare
         {[
           { icon: 'bar-chart-2', label: 'Stats detalhados', action: () => navigate('/stats') },
           { icon: 'award', label: 'As minhas conquistas', action: onLevelUp },
-          { icon: 'crown', label: subStatus === 'active' ? `Activa até ${subExpiresAt}` : 'Subscrever', action: () => navigate('/paywall') },
+          { icon: 'crown', label: subStatus === 'active' ? `Activa até ${formatExpiresAt(subExpiresAt)}` : 'Subscrever', action: () => navigate('/paywall') },
           { icon: 'share-2', label: `Partilhar o meu ${monthLabel}`, action: () => onShare('wrapped') },
           { icon: dark ? 'sun' : 'moon', label: dark ? 'Modo claro' : 'Modo escuro', action: toggleDark },
           { icon: 'log-out', label: 'Terminar sessão', action: () => { useAuthStore.getState().logout(); navigate('/') } },

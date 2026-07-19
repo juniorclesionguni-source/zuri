@@ -32,6 +32,19 @@ supabase/
 política de escrita em `subscriptions`/`payments`; o flip vem do worker M-Pesa
 com a `service_role key` (que ignora RLS) chamando `activate_subscription()`.
 
+## Storage (Cloudflare R2)
+
+Bucket único **`zuri-books`** (o nome antigo "zuri-epubs" em comentários está obsoleto):
+- `epubs/…` — **privado**. Único acesso é via `book-access` (URL assinado 120 s;
+  `sample: true` para não-subscritores — o Reader limita ao 1º capítulo).
+- `covers/…` — público via `VITE_R2_PUBLIC_URL` (o domínio público serve só capas).
+
+⚠️ Acção manual: desligar o acesso público aos EPUBs no dashboard do R2
+(o domínio público não deve expor `epubs/`).
+
+Upload de livros: painel `/admin` na app (Edge Function `admin-upload`,
+presigned PUT) — o fluxo antigo de migrations SQL + scripts está retirado.
+
 ## Aplicar
 
 ### Opção A — Supabase CLI (recomendado)

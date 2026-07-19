@@ -23,14 +23,3 @@ export const QUOTE = {
   author: 'Mia Couto',
   book: 'Terra Sonâmbula',
 }
-
-export const CATEGORIES = [
-  { name: 'Romance', icon: 'heart', count: 42 },
-  { name: 'Ficção', icon: 'book-open', count: 78 },
-  { name: 'História', icon: 'landmark', count: 31 },
-  { name: 'Poesia', icon: 'feather', count: 24 },
-  { name: 'Ensaio', icon: 'file-text', count: 19 },
-  { name: 'Suspense', icon: 'zap', count: 37 },
-  { name: 'Biografia', icon: 'user', count: 28 },
-  { name: 'Des. Pessoal', icon: 'target', count: 15 },
-]

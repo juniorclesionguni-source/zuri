@@ -7,7 +7,8 @@ import { useCatalog } from '../../store/catalog'
 import { useLibrary } from '../../store/library'
 import { useAuthStore } from '../../store/auth'
 import { saveProgress, getProgress, logSession, getOfflineBook } from '../../data/db'
-import { progress as progressApi } from '../../data/services'
+import { progress as progressApi, content as contentApi } from '../../data/services'
+import { isSupabaseConfigured } from '../../lib/supabaseConfig'
 
 const THEMES: Record<string, { bg: string; text: string }> = {
   claro:  { bg: '#FEF8F5', text: '#3A2020' },
@@ -30,6 +31,7 @@ export function Reader() {
   const renditionRef = useRef<any>(null)
   const epubRef = useRef<any>(null)
   const startedAtRef = useRef(0)   // timestamp de início da sessão
+  const sampleRef = useRef(false)  // amostra grátis: limitada ao 1º item do spine
   const prevPctRef = useRef(0)     // pct anterior (para detectar cruzamento 95%)
 
   const [loading, setLoading] = useState(true)
@@ -37,6 +39,7 @@ export function Reader() {
   const [prog, setProg] = useState(0)
   const [chromeVisible, setChromeVisible] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [sampleEnded, setSampleEnded] = useState(false)
 
   // reader settings
   const [theme, setTheme] = useState('sépia')
@@ -83,10 +86,25 @@ export function Reader() {
     ;(async () => {
       try {
         const ePub = (await import('epubjs')).default
-        // Descarregado → lê do blob local (offline). Senão → pede URL assinado (exige subscrição).
-        // Descarregado → lê do blob local (offline). Senão → do URL público.
-        const offline = id ? await getOfflineBook(id) : undefined
-        epubInstance = ePub(offline?.data ?? book!.epub_path!)
+        // Descarregado → blob local (offline). Senão, com backend → URL assinado do
+        // book-access (sample=true limita ao 1º capítulo). Sem backend (mock) → epub_path directo.
+        // Blob offline vale para subscritores e durante a graça pós-expiração;
+        // fora dela cai para o fluxo online (que devolve sample p/ não-subscritores).
+        const { canReadOffline } = await import('../../store/subscription')
+        const offline = id && canReadOffline() ? await getOfflineBook(id) : undefined
+        let source: any = offline?.data
+        let sample = false
+        if (!source) {
+          if (isSupabaseConfigured && id) {
+            const r = await contentApi.getBookUrl(id)
+            source = r.url
+            sample = r.sample
+          } else {
+            source = book!.epub_path!
+          }
+        }
+        sampleRef.current = sample
+        epubInstance = ePub(source)
         epubRef.current = epubInstance
 
         renditionInstance = epubInstance.renderTo(containerRef.current!, {
@@ -131,6 +149,8 @@ export function Reader() {
 
         let turns = 0
         renditionInstance.on('relocated', (loc: any) => {
+          // Amostra: passou do 1º item do spine → overlay de paywall (bloqueia a leitura).
+          if (sampleRef.current && loc.start.index > 0) setSampleEnded(true)
           turns++
           let pct = epubInstance.locations?.total
             ? Math.round(epubInstance.locations.percentageFromCfi(loc.start.cfi) * 100)
@@ -278,6 +298,18 @@ export function Reader() {
       )}
 
       {/* Navegação por toque/tecla é feita dentro do iframe (hooks.content) — ver efeito acima. */}
+
+      {/* Fim da amostra grátis */}
+      {sampleEnded && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 60, background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center' }}>
+          <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 24, color: '#3A2020', maxWidth: 300, lineHeight: 1.3 }}>Gostaste do primeiro capítulo?</div>
+          <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: '#6B4A4A', margin: '14px 0 32px', maxWidth: 280, lineHeight: 1.5 }}>Continua a ler este e todos os livros da Zuri por 45 MT/mês.</p>
+          <div style={{ width: '100%', maxWidth: 300, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button onClick={() => navigate('/paywall')} style={{ height: 52, borderRadius: 12, border: 'none', background: '#C96A58', color: '#FEF8F5', fontFamily: 'var(--sans)', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>Subscrever</button>
+            <button onClick={() => navigate(-1)} style={{ height: 48, background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 14, color: '#9B8080', cursor: 'pointer' }}>Voltar</button>
+          </div>
+        </div>
+      )}
 
       {showSettings && (
         <ReaderSettings

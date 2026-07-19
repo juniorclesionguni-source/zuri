@@ -26,6 +26,8 @@ export default defineConfig({
         runtimeCaching: [
           { urlPattern: /^https:\/\/fonts\.googleapis\.com/, handler: 'CacheFirst' as const },
           { urlPattern: /^https:\/\/fonts\.gstatic\.com/, handler: 'CacheFirst' as const },
+          // Capas do R2 (públicas): cache-first — instantâneas nas visitas seguintes.
+          { urlPattern: /\/covers\//, handler: 'CacheFirst' as const, options: { cacheName: 'zuri-covers', expiration: { maxEntries: 200 } } },
         ],
       },
     }),

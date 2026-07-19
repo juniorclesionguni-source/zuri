@@ -77,14 +77,22 @@ export function Library() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 20, padding: '0 20px' }}>
           {list.map((b) => (
-            <BookCard
-              key={b.id}
-              book={b}
-              onClick={() => navigate(`/book/${b.id}`)}
-              fluid
-              showProgress={tab === 'A ler'}
-              progress={progress[b.id]?.pct ?? 0}
-            />
+            <div key={b.id} style={{ position: 'relative' }}>
+              <BookCard
+                book={b}
+                onClick={() => navigate(`/book/${b.id}`)}
+                fluid
+                showProgress={tab === 'A ler'}
+                progress={progress[b.id]?.pct ?? 0}
+              />
+              {downloads[b.id] && (
+                <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', alignItems: 'center', gap: 4, padding: '3px 7px', background: 'rgba(0,0,0,0.55)', borderRadius: 999 }}
+                  title="Guardado no teu telefone — lê sem gastar megas">
+                  <Icon name="check" size={10} color="#FEF8F5" strokeWidth={2.5} />
+                  <span style={{ fontFamily: 'var(--sans)', fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', color: '#FEF8F5' }}>OFFLINE</span>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}

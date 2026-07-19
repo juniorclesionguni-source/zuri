@@ -3,15 +3,38 @@ import { useNavigate } from 'react-router-dom'
 import { Icon } from '../../components/ui/Icon'
 import { PrimaryButton } from '../../components/ui/Button'
 import { useSubStore } from '../../store/subscription'
+import { isSupabaseConfigured } from '../../lib/supabaseConfig'
+import { mpesa } from '../../data/services'
 
 export function Checkout() {
   const navigate = useNavigate()
   const setPending = useSubStore((s) => s.setPending)
-  const [num, setNum] = useState('84 567 8910')
+  const [num, setNum] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
 
-  const pay = () => {
-    setPending()
-    navigate('/processing')
+  const pay = async () => {
+    const digits = num.replace(/\D/g, '').replace(/^258/, '').replace(/^0+/, '')
+    if (!/^8[45]\d{7}$/.test(digits)) {
+      setError('Introduz um número M-Pesa válido (84 ou 85).')
+      return
+    }
+    setError('')
+    if (!isSupabaseConfigured) {
+      // Modo mock (sem backend): fluxo simulado.
+      setPending()
+      navigate('/processing')
+      return
+    }
+    setBusy(true)
+    try {
+      const { transactionId } = await mpesa.initiate('258' + digits)
+      setPending()
+      navigate('/processing', { state: { txId: transactionId } })
+    } catch {
+      setError('Pagamento recusado. Verifica o número e tenta de novo.')
+      setBusy(false)
+    }
   }
 
   return (
@@ -47,8 +70,9 @@ export function Checkout() {
             </div>
             <span style={{ fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text2)' }}>+258</span>
           </div>
-          <input value={num} onChange={(e) => setNum(e.target.value)} style={{ flex: 1, border: 'none', background: 'transparent', fontFamily: 'var(--sans)', fontSize: 16, color: 'var(--text)', outline: 'none' }} />
+          <input value={num} onChange={(e) => setNum(e.target.value)} inputMode="numeric" placeholder="84 xxx xxxx" style={{ flex: 1, border: 'none', background: 'transparent', fontFamily: 'var(--sans)', fontSize: 16, color: 'var(--text)', outline: 'none' }} />
         </div>
+        {error && <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: '#C0453E', marginTop: 8 }}>{error}</div>}
       </div>
 
       {/* Info callout */}
@@ -57,7 +81,7 @@ export function Checkout() {
         <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text2)', lineHeight: 1.5 }}>Vais receber um pedido no teu telefone. Introduz o PIN M-Pesa para autorizar o pagamento.</div>
       </div>
 
-      <PrimaryButton onClick={pay}>Pagar 45 MT</PrimaryButton>
+      <PrimaryButton onClick={pay} disabled={busy}>{busy ? 'A iniciar…' : 'Pagar 45 MT'}</PrimaryButton>
       <div style={{ height: 10 }} />
       <button onClick={() => navigate(-1)} style={{ width: '100%', height: 52, background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--text3)', cursor: 'pointer' }}>Cancelar</button>
     </div>

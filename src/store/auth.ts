@@ -8,6 +8,7 @@ interface User {
   email: string
   genres: string[]
   created_at?: string
+  is_admin?: boolean
 }
 
 interface AuthState {
