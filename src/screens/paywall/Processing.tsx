@@ -12,14 +12,15 @@ const TIMEOUT_MS = 90_000
 export function Processing() {
   const navigate = useNavigate()
   const setActive = useSubStore((s) => s.setActive)
-  const txId = (useLocation().state as { txId?: string } | null)?.txId
+  const state = useLocation().state as { txId?: string; days?: number } | null
+  const txId = state?.txId
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     // Modo mock (sem backend ou sem txId): confirmação simulada.
     if (!isSupabaseConfigured || !txId) {
       const t = setTimeout(() => {
-        setActive()
+        setActive(state?.days)
         navigate('/success')
       }, 2600)
       return () => clearTimeout(t)
@@ -45,7 +46,7 @@ export function Processing() {
     }
     const t = setTimeout(tick, POLL_MS)
     return () => { stopped = true; clearTimeout(t) }
-  }, [navigate, setActive, txId])
+  }, [navigate, setActive, txId, state?.days])
 
   if (failed) {
     return (

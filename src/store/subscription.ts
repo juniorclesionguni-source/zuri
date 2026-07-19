@@ -7,7 +7,7 @@ interface SubState {
   status: SubStatus
   expiresAt: string | null // ISO; formatar só na exibição
   setPending: () => void
-  setActive: () => void // caminho mock (sem Supabase)
+  setActive: (days?: number) => void // caminho mock (sem Supabase)
   setFromServer: (s: { status: string; expiresAt: string | null }) => void
   hydrate: (userId: string) => Promise<void>
 }
@@ -19,9 +19,9 @@ export const useSubStore = create<SubState>()(
       status: 'inactive',
       expiresAt: null,
       setPending: () => set({ status: 'pending' }),
-      setActive: () => {
+      setActive: (days = 30) => {
         const d = new Date()
-        d.setMonth(d.getMonth() + 1)
+        d.setDate(d.getDate() + days)
         set({ status: 'active', expiresAt: d.toISOString() })
       },
       setFromServer: (s) =>

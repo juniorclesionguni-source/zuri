@@ -3,11 +3,11 @@
 // A ACTIVAÇÃO acontece depois, no callback — nunca aqui, nunca no cliente.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { c2bPayment, normalizeMsisdn } from '../_shared/mpesa.ts'
+import { PLANS, isPlanId } from '../_shared/plans.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const PRICE_MT = 45
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -24,8 +24,10 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get('Authorization')
   if (!authHeader) return json({ error: 'unauthorized' }, 401)
 
-  const { phone } = await req.json().catch(() => ({}))
+  const { phone, plan } = await req.json().catch(() => ({}))
   if (!phone || !normalizeMsisdn(String(phone))) return json({ error: 'invalid_phone' }, 400)
+  if (!isPlanId(plan)) return json({ error: 'invalid_plan' }, 400)
+  const { price, days } = PLANS[plan] // preço e dias vêm do servidor, nunca do cliente
 
   // Identifica o utilizador a partir do JWT (não confiamos num user_id do corpo).
   const userClient = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: authHeader } } })
@@ -36,11 +38,11 @@ Deno.serve(async (req) => {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE)
 
   await admin.from('payments').insert({
-    user_id: user.id, transaction_id: transactionId, phone, amount: PRICE_MT, status: 'pending',
+    user_id: user.id, transaction_id: transactionId, phone, amount: price, plan_days: days, status: 'pending',
   })
   await admin.from('subscriptions').update({ status: 'pending' }).eq('user_id', user.id)
 
-  const res = await c2bPayment({ phone, amount: PRICE_MT, reference: transactionId })
+  const res = await c2bPayment({ phone, amount: price, reference: transactionId })
   if (!res.ok) {
     await admin.from('payments').update({ status: 'failed', raw: res.raw }).eq('transaction_id', transactionId)
     return json({ error: 'pagamento recusado pelo M-Pesa' }, 502)

@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Icon } from '../../components/ui/Icon'
 import { PrimaryButton } from '../../components/ui/Button'
 import { useSubStore } from '../../store/subscription'
 import { isSupabaseConfigured } from '../../lib/supabaseConfig'
 import { mpesa } from '../../data/services'
+import { getPlan, DEFAULT_PLAN, type PlanId } from '../../data/plans'
 
 export function Checkout() {
   const navigate = useNavigate()
+  const planId = (useLocation().state?.plan as PlanId) ?? DEFAULT_PLAN
+  const plan = getPlan(planId)
   const setPending = useSubStore((s) => s.setPending)
   const [num, setNum] = useState('')
   const [error, setError] = useState('')
@@ -23,12 +26,12 @@ export function Checkout() {
     if (!isSupabaseConfigured) {
       // Modo mock (sem backend): fluxo simulado.
       setPending()
-      navigate('/processing')
+      navigate('/processing', { state: { days: plan.days } })
       return
     }
     setBusy(true)
     try {
-      const { transactionId } = await mpesa.initiate('258' + digits)
+      const { transactionId } = await mpesa.initiate('258' + digits, plan.id)
       setPending()
       navigate('/processing', { state: { txId: transactionId } })
     } catch {
@@ -49,11 +52,11 @@ export function Checkout() {
       {/* Summary */}
       <div style={{ background: 'var(--bg2)', borderRadius: 16, padding: 18, marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--sans)', fontSize: 14, color: 'var(--text)' }}>
-          <span>Zuri · Subscrição mensal</span><span>45 MT</span>
+          <span>Zuri · Plano {plan.label}</span><span>{plan.price} MT</span>
         </div>
         <div style={{ height: 1, background: 'var(--border)', margin: '14px 0' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--text)', fontWeight: 700 }}>
-          <span>Total a pagar</span><span>45 MT</span>
+          <span>Total a pagar</span><span>{plan.price} MT</span>
         </div>
       </div>
 
@@ -81,7 +84,7 @@ export function Checkout() {
         <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text2)', lineHeight: 1.5 }}>Vais receber um pedido no teu telefone. Introduz o PIN M-Pesa para autorizar o pagamento.</div>
       </div>
 
-      <PrimaryButton onClick={pay} disabled={busy}>{busy ? 'A iniciar…' : 'Pagar 45 MT'}</PrimaryButton>
+      <PrimaryButton onClick={pay} disabled={busy}>{busy ? 'A iniciar…' : `Pagar ${plan.price} MT`}</PrimaryButton>
       <div style={{ height: 10 }} />
       <button onClick={() => navigate(-1)} style={{ width: '100%', height: 52, background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 15, color: 'var(--text3)', cursor: 'pointer' }}>Cancelar</button>
     </div>

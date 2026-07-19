@@ -4,9 +4,11 @@ import { authHeaders } from './content'
 // Pagamento M-Pesa real. O preço é do servidor (mpesa-initiate); o cliente só envia o número.
 // A activação acontece no mpesa-callback via activate_subscription — nunca aqui.
 
-export async function initiatePayment(phone: string): Promise<{ transactionId: string; status: string }> {
+import type { PlanId } from '../plans'
+
+export async function initiatePayment(phone: string, plan: PlanId): Promise<{ transactionId: string; status: string }> {
   const { data, error } = await supabase!.functions.invoke('mpesa-initiate', {
-    body: { phone },
+    body: { phone, plan },
     headers: await authHeaders(),
   })
   if (error) throw error

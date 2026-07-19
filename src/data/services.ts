@@ -25,6 +25,6 @@ export const content = {
 }
 
 export const mpesa = {
-  initiate: async (phone: string) => (await import('./api/mpesa')).initiatePayment(phone),
+  initiate: async (phone: string, plan: import('./plans').PlanId) => (await import('./api/mpesa')).initiatePayment(phone, plan),
   poll: async (tx: string) => (await import('./api/mpesa')).pollPayment(tx),
 }

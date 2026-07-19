@@ -28,13 +28,13 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE)
   const { data: payment } = await admin.from('payments')
-    .select('user_id').eq('transaction_id', transactionId).single()
+    .select('user_id, plan_days').eq('transaction_id', transactionId).single()
   if (!payment) return json({ error: 'transação desconhecida' }, 404)
 
   if (success) {
     await admin.from('payments').update({ status: 'success', raw: body }).eq('transaction_id', transactionId)
     await admin.rpc('activate_subscription', {
-      p_user_id: payment.user_id, p_transaction_id: transactionId, p_months: 1,
+      p_user_id: payment.user_id, p_transaction_id: transactionId, p_days: payment.plan_days ?? 30,
     })
   } else {
     await admin.from('payments').update({ status: 'failed', raw: body }).eq('transaction_id', transactionId)
