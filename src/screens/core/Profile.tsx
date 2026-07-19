@@ -119,6 +119,7 @@ export function Profile({ onLevelUp, onShare }: { onLevelUp: () => void; onShare
       {/* Shortcuts */}
       <div style={{ margin: '24px 20px 0', background: 'var(--bg2)', borderRadius: 16, overflow: 'hidden' }}>
         {[
+          ...(user?.is_admin ? [{ icon: 'settings', label: 'Back-office (admin)', action: () => navigate('/admin') }] : []),
           { icon: 'bar-chart-2', label: 'Stats detalhados', action: () => navigate('/stats') },
           { icon: 'award', label: 'As minhas conquistas', action: onLevelUp },
           { icon: 'crown', label: subStatus === 'active' ? `Activa até ${formatExpiresAt(subExpiresAt)}` : 'Subscrever', action: () => navigate('/paywall') },
