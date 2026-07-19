@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PrimaryButton } from '../../components/ui/Button'
+import { PLANS } from '../../data/plans'
 
 const SLIDES = [
   {
@@ -12,7 +13,7 @@ const SLIDES = [
     sub: 'A tua jornada de leitura, recompensada.',
   },
   {
-    title: 'Tudo por 45 MT/mês',
+    title: `Desde ${PLANS[0].price} MT`,
     sub: 'Paga com M-Pesa. Cancela quando quiseres.',
   },
 ]

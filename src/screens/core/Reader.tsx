@@ -8,6 +8,7 @@ import { useLibrary } from '../../store/library'
 import { useAuthStore } from '../../store/auth'
 import { saveProgress, getProgress, logSession, getOfflineBook } from '../../data/db'
 import { progress as progressApi, content as contentApi } from '../../data/services'
+import { PLANS } from '../../data/plans'
 
 const THEMES: Record<string, { bg: string; text: string }> = {
   claro:  { bg: '#FEF8F5', text: '#3A2020' },
@@ -297,13 +298,18 @@ export function Reader() {
 
       {/* Navegação por toque/tecla é feita dentro do iframe (hooks.content) — ver efeito acima. */}
 
-      {/* Fim da amostra grátis */}
+      {/* Fim da amostra grátis — perda concreta (o livro/progresso já lido) converte mais
+          do que um argumento genérico de valor da app. Preço = plano mais barato, nunca fixo. */}
       {sampleEnded && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center' }}>
-          <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 24, color: '#3A2020', maxWidth: 300, lineHeight: 1.3 }}>Gostaste do primeiro capítulo?</div>
-          <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: '#6B4A4A', margin: '14px 0 32px', maxWidth: 280, lineHeight: 1.5 }}>Continua a ler este e todos os livros da Zuri por 45 MT/mês.</p>
+          <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 24, color: '#3A2020', maxWidth: 300, lineHeight: 1.3 }}>
+            Estás a {Math.max(prog, SAMPLE_PCT)}% de "{book?.title}".
+          </div>
+          <p style={{ fontFamily: 'var(--sans)', fontSize: 14, color: '#6B4A4A', margin: '14px 0 32px', maxWidth: 280, lineHeight: 1.5 }}>
+            Não percas o lugar onde ficaste. Continua a ler desde {PLANS[0].price} MT.
+          </p>
           <div style={{ width: '100%', maxWidth: 300, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <button onClick={() => navigate('/paywall')} style={{ height: 52, borderRadius: 12, border: 'none', background: '#C96A58', color: '#FEF8F5', fontFamily: 'var(--sans)', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>Subscrever</button>
+            <button onClick={() => navigate('/paywall')} style={{ height: 52, borderRadius: 12, border: 'none', background: '#C96A58', color: '#FEF8F5', fontFamily: 'var(--sans)', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>Continuar a ler</button>
             <button onClick={() => navigate(-1)} style={{ height: 48, background: 'none', border: 'none', fontFamily: 'var(--sans)', fontSize: 14, color: '#9B8080', cursor: 'pointer' }}>Voltar</button>
           </div>
         </div>

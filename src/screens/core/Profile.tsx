@@ -19,6 +19,11 @@ export function Profile({ onLevelUp, onShare }: { onLevelUp: () => void; onShare
   const toggleDark = useUIStore((s) => s.toggleDark)
   const dark = useUIStore((s) => s.dark)
   const { status: subStatus, expiresAt: subExpiresAt } = useSubStore()
+  // Aviso de renovação com perda concreta (não um "activa até" neutro) nos últimos 3 dias —
+  // é o momento equivalente ao "cancel screen": não há botão de cancelar (M-Pesa não é
+  // recorrente), a não-renovação é que é o "cancel" silencioso.
+  const daysToExpiry = subExpiresAt ? Math.ceil((new Date(subExpiresAt).getTime() - Date.now()) / 86_400_000) : null
+  const expiringSoon = subStatus === 'active' && daysToExpiry !== null && daysToExpiry <= 3
 
   const [dailyMins, setDailyMins] = useState<Record<string, number>>({})
 
@@ -122,7 +127,13 @@ export function Profile({ onLevelUp, onShare }: { onLevelUp: () => void; onShare
           ...(user?.is_admin ? [{ icon: 'settings', label: 'Back-office (admin)', action: () => navigate('/admin') }] : []),
           { icon: 'bar-chart-2', label: 'Stats detalhados', action: () => navigate('/stats') },
           { icon: 'award', label: 'As minhas conquistas', action: onLevelUp },
-          { icon: 'crown', label: subStatus === 'active' ? `Activa até ${formatExpiresAt(subExpiresAt)}` : 'Subscrever', action: () => navigate('/paywall') },
+          {
+            icon: 'crown',
+            label: expiringSoon
+              ? `Acaba em ${daysToExpiry} dia${daysToExpiry === 1 ? '' : 's'} — perdes o acesso à biblioteca`
+              : subStatus === 'active' ? `Activa até ${formatExpiresAt(subExpiresAt)}` : 'Subscrever',
+            action: () => navigate('/paywall'),
+          },
           { icon: 'share-2', label: `Partilhar o meu ${monthLabel}`, action: () => onShare('wrapped') },
           { icon: dark ? 'sun' : 'moon', label: dark ? 'Modo claro' : 'Modo escuro', action: toggleDark },
           { icon: 'log-out', label: 'Terminar sessão', action: () => { useAuthStore.getState().logout(); navigate('/') } },

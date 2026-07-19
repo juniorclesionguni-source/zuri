@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ZuriMark } from '../../components/ui/ZuriMark'
 import { Icon } from '../../components/ui/Icon'
 import { PrimaryButton } from '../../components/ui/Button'
-import { PLANS, DEFAULT_PLAN, type PlanId } from '../../data/plans'
+import { PLANS, DEFAULT_PLAN, getPlan, type PlanId } from '../../data/plans'
 
 const BENEFITS = [
   { icon: 'library', text: 'Acesso ilimitado à biblioteca' },
@@ -51,13 +51,17 @@ export function Paywall() {
                 <span style={{ fontFamily: 'var(--serif)', fontSize: 14, color: on ? 'var(--accent)' : 'var(--text)' }}>MT</span>
                 <span style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginLeft: 2 }}>{p.per}</span>
               </div>
+              {/* Prova concreta atrás da badge de desconto — MT/dia torna "2 meses grátis" tangível. */}
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>{(p.price / p.days).toFixed(2)} MT/dia</div>
             </button>
           )
         })}
       </div>
       <div style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--text3)', marginBottom: 20, textAlign: 'center' }}>Pagamento via M-Pesa · Cancela a qualquer momento</div>
 
-      <PrimaryButton onClick={() => navigate('/checkout', { state: { plan } })}>Subscrever</PrimaryButton>
+      <PrimaryButton onClick={() => navigate('/checkout', { state: { plan } })}>
+        Assinar por {getPlan(plan).price} MT{getPlan(plan).per}
+      </PrimaryButton>
       <div style={{ textAlign: 'center', margin: '18px 0 0', fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', lineHeight: 1.5 }}>
         Ao continuar aceitas os <u>Termos</u> e <u>Política de Privacidade</u>.
       </div>
