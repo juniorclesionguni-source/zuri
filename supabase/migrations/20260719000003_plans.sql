@@ -4,9 +4,11 @@
 alter table public.payments
   add column if not exists plan_days int not null default 30;
 
--- Recria com p_days (mesma assinatura de tipos uuid,text,int → o revoke anterior mantém-se).
--- Empilha renovações: estende a partir do maior entre agora e a expiração actual.
-create or replace function public.activate_subscription(
+-- Renomear parâmetro (p_months→p_days) exige DROP; create-or-replace não o permite.
+drop function if exists public.activate_subscription(uuid, text, int);
+
+-- Recria com p_days. Empilha renovações: estende a partir do maior entre agora e a expiração actual.
+create function public.activate_subscription(
   p_user_id uuid,
   p_transaction_id text,
   p_days int default 30
