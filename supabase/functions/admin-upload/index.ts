@@ -11,7 +11,8 @@ const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const R2_ACCOUNT = Deno.env.get('R2_ACCOUNT_ID')!
 const R2_KEY = Deno.env.get('R2_ACCESS_KEY_ID')!
 const R2_SECRET = Deno.env.get('R2_SECRET_ACCESS_KEY')!
-const R2_BUCKET = Deno.env.get('R2_BUCKET') ?? 'zuri-books'
+const R2_EPUB_BUCKET = Deno.env.get('R2_EPUB_BUCKET') ?? 'zuri-epubs'   // privado
+const R2_COVER_BUCKET = Deno.env.get('R2_COVER_BUCKET') ?? Deno.env.get('R2_BUCKET') ?? 'zuri-books' // público
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -23,9 +24,9 @@ const json = (b: unknown, s = 200) =>
 
 const SLUG = /^[a-z0-9-]{2,64}$/
 
-async function presignPut(key: string): Promise<string> {
+async function presignPut(bucket: string, key: string): Promise<string> {
   const r2 = new AwsClient({ accessKeyId: R2_KEY, secretAccessKey: R2_SECRET, region: 'auto', service: 's3' })
-  const target = new URL(`https://${R2_ACCOUNT}.r2.cloudflarestorage.com/${R2_BUCKET}/${key}`)
+  const target = new URL(`https://${R2_ACCOUNT}.r2.cloudflarestorage.com/${bucket}/${key}`)
   target.searchParams.set('X-Amz-Expires', '600')
   const signed = await r2.sign(target.toString(), { method: 'PUT', aws: { signQuery: true } })
   return signed.url
@@ -53,8 +54,8 @@ Deno.serve(async (req) => {
     if (!SLUG.test(String(bookId ?? ''))) return json({ error: 'bookId inválido' }, 400)
     const ext = ['jpg', 'jpeg', 'png', 'webp'].includes(coverExt) ? coverExt : 'jpg'
     return json({
-      epubUrl: epub ? await presignPut(`epubs/${bookId}.epub`) : undefined,
-      coverUrl: cover ? await presignPut(`covers/${bookId}.${ext}`) : undefined,
+      epubUrl: epub ? await presignPut(R2_EPUB_BUCKET, `epubs/${bookId}.epub`) : undefined,
+      coverUrl: cover ? await presignPut(R2_COVER_BUCKET, `covers/${bookId}.${ext}`) : undefined,
       epubPath: epub ? `epubs/${bookId}.epub` : undefined,
       coverPath: cover ? `covers/${bookId}.${ext}` : undefined,
     })
