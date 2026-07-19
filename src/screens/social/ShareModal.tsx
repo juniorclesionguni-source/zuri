@@ -9,7 +9,7 @@ import { CardQuote } from './share-cards/CardQuote'
 import { useStatsStore } from '../../store/stats'
 import { useCatalog } from '../../store/catalog'
 import { useLibrary } from '../../store/library'
-import { QUOTE } from '../../data/catalog'
+import { pickQuote } from '../../data/quote'
 
 const CARDS: { kind: string; label: string; Component: React.ComponentType<any> }[] = [
   { kind: 'book-finished', label: 'Livro lido', Component: CardBookFinished },
@@ -59,7 +59,10 @@ export function ShareModal({ initialKind = 'wrapped', onClose }: { initialKind?:
       case 'streak':        return { days: stats.streakDays }
       case 'levelup':       return { level: stats.level }
       case 'wrapped':       return { month: monthPT, stats: { books: stats.booksRead, hours: stats.hoursRead, streak: stats.streakDays }, book: featBook }
-      case 'quote':         return { quote: QUOTE.text, book: QUOTE.book, author: QUOTE.author }
+      case 'quote': {
+        const q = pickQuote(books, featured?.id)
+        return q ? { quote: q.text, book: q.book, author: q.author } : { quote: '', book: '', author: '' }
+      }
       default:              return {}
     }
   }

@@ -4,7 +4,7 @@ import { BookCard } from '../../components/ui/BookCard'
 import { BookCover } from '../../components/ui/BookCover'
 import { Icon } from '../../components/ui/Icon'
 import { ZuriMark } from '../../components/ui/ZuriMark'
-import { QUOTE } from '../../data/catalog'
+import { pickQuote } from '../../data/quote'
 import { recommend } from '../../data/recommend'
 import { useAuthStore } from '../../store/auth'
 import { useCatalog } from '../../store/catalog'
@@ -49,6 +49,7 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
     .sort((a, b) => (progress[b.id]?.updatedAt ?? 0) - (progress[a.id]?.updatedAt ?? 0))[0] ?? null
 
   const suggestions = recommend({ books, genres: user?.genres ?? [], favorites, progress, limit: 4 })
+  const quote = pickQuote(books, progressBook?.id, user?.genres ?? [])
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>
@@ -148,11 +149,12 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
         </div>
       </div>
 
-      {/* Citação */}
+      {/* Citação — de um livro real do catálogo (o que estás a ler, senão do teu género, senão a do dia) */}
+      {quote && (
       <div style={{ margin: '32px 20px 0', padding: '22px 20px', background: 'var(--bg2)', borderRadius: 20, position: 'relative' }}>
         <Icon name="quote" size={18} color="var(--accent)" strokeWidth={1} />
-        <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 17, lineHeight: 1.4, color: 'var(--text)', marginTop: 10 }}>"{QUOTE.text}"</div>
-        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 10, letterSpacing: '0.08em' }}>{QUOTE.author.toUpperCase()} · {QUOTE.book}</div>
+        <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 17, lineHeight: 1.4, color: 'var(--text)', marginTop: 10 }}>"{quote.text}"</div>
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 10, letterSpacing: '0.08em' }}>{quote.author.toUpperCase()} · {quote.book}</div>
         <div
           onClick={() => onShare('quote')}
           style={{ position: 'absolute', top: 20, right: 20, cursor: 'pointer', width: 32, height: 32, borderRadius: 16, background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}
@@ -160,6 +162,7 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
           <Icon name="share-2" size={14} color="var(--text2)" strokeWidth={1.8} />
         </div>
       </div>
+      )}
     </div>
   )
 }

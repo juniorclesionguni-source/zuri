@@ -7,7 +7,7 @@ import { useAuthStore } from '../../store/auth'
 import type { AdminBook, AdminStats, BookRequest } from '../../data/api/admin'
 
 const GENRES = ['Romance', 'Ficção', 'História', 'Poesia', 'Ensaio', 'Suspense', 'Biografia', 'Des. Pessoal']
-const EMPTY: AdminBook = { id: '', title: '', author: '', genre: 'Ficção', synopsis: '', pages: 0, mins: 0, rating: 0, is_published: false }
+const EMPTY: AdminBook = { id: '', title: '', author: '', genre: 'Ficção', synopsis: '', excerpt: '', pages: 0, mins: 0, rating: 0, is_published: false }
 const REQ_STATUS = ['pending', 'review', 'licensing', 'available']
 type Section = 'painel' | 'catalogo' | 'pedidos'
 
@@ -78,11 +78,18 @@ export function Admin() {
         if (coverUrl) cover = await (await fetch(coverUrl)).blob()
       } catch { /* sem capa embutida */ }
       let words = 0
+      let excerptCandidate = ''
       try {
         const spine: any = book.spine
         for (const item of spine.items ?? []) {
           const doc = await item.load(book.load.bind(book))
-          words += (doc?.body?.textContent ?? '').split(/\s+/).filter(Boolean).length
+          const text = (doc?.body?.textContent ?? '').replace(/\s+/g, ' ').trim()
+          words += text.split(' ').filter(Boolean).length
+          // 1º parágrafo com prosa real (>60 car.) — salta capa/rosto/ficha técnica, curtos demais.
+          if (!excerptCandidate) {
+            const para = text.split(/(?<=[.!?])\s+/).find((s: string) => s.length > 60)
+            if (para) excerptCandidate = para.slice(0, 240).trim()
+          }
           item.unload()
         }
       } catch { /* estimativa falhou — campos ficam editáveis */ }
@@ -93,6 +100,7 @@ export function Admin() {
         author: f?.author || author,
         mins: f?.mins || Math.round(words / 200),
         pages: f?.pages || Math.round(words / 300),
+        excerpt: f?.excerpt || excerptCandidate,
       }))
       if (cover) { setCoverBlob(cover); setCoverPreview(URL.createObjectURL(cover)) }
     } finally { setBusy('') }
@@ -246,6 +254,8 @@ export function Admin() {
             </select>
             <label style={label}>Sinopse</label>
             <textarea value={form.synopsis ?? ''} onChange={(e) => set({ synopsis: e.target.value })} rows={4} style={{ ...input, resize: 'vertical' }} />
+            <label style={label}>Citação (mostrada na Home/partilha — extraída do EPUB, revê antes de guardar)</label>
+            <textarea value={form.excerpt ?? ''} onChange={(e) => set({ excerpt: e.target.value })} rows={3} style={{ ...input, resize: 'vertical', fontFamily: 'var(--serif)', fontStyle: 'italic' }} />
             <div style={{ display: 'flex', gap: 12 }}>
               <div style={{ flex: 1 }}><label style={label}>Páginas</label><input type="number" value={form.pages || ''} onChange={(e) => set({ pages: Number(e.target.value) || 0 })} style={input} /></div>
               <div style={{ flex: 1 }}><label style={label}>Minutos</label><input type="number" value={form.mins || ''} onChange={(e) => set({ mins: Number(e.target.value) || 0 })} style={input} /></div>

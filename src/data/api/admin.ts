@@ -7,6 +7,7 @@ export interface AdminBook {
   author: string
   genre?: string
   synopsis?: string
+  excerpt?: string
   pages: number
   mins: number
   rating: number
@@ -56,7 +57,7 @@ export async function fetchAllBooks(): Promise<AdminBook[]> {
   if (error || !data) return []
   return (data as any[]).map((r) => ({
     id: r.id, title: r.title, author: r.author, genre: r.genre ?? undefined,
-    synopsis: r.synopsis ?? undefined, pages: r.pages ?? 0, mins: r.mins ?? 0,
+    synopsis: r.synopsis ?? undefined, excerpt: r.excerpt ?? undefined, pages: r.pages ?? 0, mins: r.mins ?? 0,
     rating: Number(r.rating) || 0, epub_path: r.epub_path, cover_path: r.cover_path,
     is_published: Boolean(r.is_published),
   }))

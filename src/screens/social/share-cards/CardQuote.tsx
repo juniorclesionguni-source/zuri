@@ -1,6 +1,6 @@
 import { ZuriMark } from '../../../components/ui/ZuriMark'
 
-export function CardQuote({ quote = 'A terra é sempre a terra de alguém.', book = 'Terra Sonâmbula', author = 'Mia Couto' }: { quote?: string; book?: string; author?: string }) {
+export function CardQuote({ quote, book, author }: { quote: string; book: string; author: string }) {
   return (
     <div style={{ width: 1080, height: 1920, background: '#FEF8F5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 120, boxSizing: 'border-box', position: 'relative' }}>
       <div style={{ position: 'absolute', top: 90, left: 90 }}><ZuriMark size={52} color="#C96A58" stroke={2} /></div>

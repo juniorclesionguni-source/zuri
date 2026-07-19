@@ -19,6 +19,7 @@ export async function fetchBooks(): Promise<Book[]> {
     rating: Number(row.rating),
     mins: row.mins as number,
     synopsis: row.synopsis as string | undefined,
+    excerpt: row.excerpt as string | undefined,
     // Chave crua no bucket privado — o URL de leitura vem do book-access (assinado).
     epub_path: (row.epub_path as string | undefined) ?? undefined,
     cover_url: row.cover_path ? `${R2}/${row.cover_path}` : undefined,

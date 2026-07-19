@@ -7,6 +7,7 @@ export interface Book {
   rating: number
   mins: number
   synopsis?: string
+  excerpt?: string
   epub_path?: string
   cover_url?: string
 }

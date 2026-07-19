@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { BookCover } from '../../components/ui/BookCover'
 import { Icon } from '../../components/ui/Icon'
-import { QUOTE } from '../../data/catalog'
+import { pickQuote } from '../../data/quote'
 import { useStatsStore } from '../../store/stats'
 import { useCatalog } from '../../store/catalog'
 import { useLibrary } from '../../store/library'
@@ -16,6 +16,10 @@ export function Reading({ onShare }: { onShare: (kind: string) => void }) {
   const reading = books
     .filter((b) => { const p = progress[b.id]; return p && p.pct > 0 && p.pct < 95 })
     .sort((a, b) => (progress[b.id]?.updatedAt ?? 0) - (progress[a.id]?.updatedAt ?? 0))
+
+  // Preso ao livro que estás mesmo a ler — nunca cai para outro (senão de que "ler" estava a falar?).
+  const activeBook = reading[0]
+  const quote = activeBook ? pickQuote([activeBook], activeBook.id) : null
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>
@@ -73,15 +77,17 @@ export function Reading({ onShare }: { onShare: (kind: string) => void }) {
         )}
       </div>
 
-      {/* Citação guardada */}
+      {/* Citação do livro que estás a ler agora — nada a mostrar se ainda não tens nenhum em progresso */}
+      {quote && (
       <div style={{ margin: '28px 20px 0', padding: '18px 20px', borderRadius: 16, border: '1.5px dashed var(--border-strong)' }}>
         <Icon name="quote" size={16} color="var(--accent)" strokeWidth={1} />
-        <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 15, lineHeight: 1.5, color: 'var(--text)', marginTop: 10 }}>"{QUOTE.text}"</div>
+        <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 15, lineHeight: 1.5, color: 'var(--text)', marginTop: 10 }}>"{quote.text}"</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
-          <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)' }}>{QUOTE.author} · {QUOTE.book}</div>
+          <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)' }}>{quote.author} · {quote.book}</div>
           <span onClick={() => onShare('quote')} style={{ fontFamily: 'var(--sans)', fontSize: 12, color: 'var(--accent)', fontWeight: 600, cursor: 'pointer' }}>Partilhar →</span>
         </div>
       </div>
+      )}
     </div>
   )
 }

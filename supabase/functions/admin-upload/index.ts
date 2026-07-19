@@ -74,6 +74,7 @@ Deno.serve(async (req) => {
       author: String(b.author),
       genre: b.genre ? String(b.genre) : null,
       synopsis: b.synopsis ? String(b.synopsis) : null,
+      excerpt: b.excerpt ? String(b.excerpt) : null,
       pages: Number(b.pages) || 0,
       mins: Number(b.mins) || 0,
       rating: Number(b.rating) || 0,
