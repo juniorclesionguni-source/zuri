@@ -18,7 +18,7 @@ const R2_COVER_BUCKET = Deno.env.get('R2_COVER_BUCKET') ?? R2_EPUB_BUCKET
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 const json = (b: unknown, s = 200) =>
