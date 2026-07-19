@@ -10,6 +10,7 @@ export function Splash() {
   useEffect(() => {
     const t = setTimeout(() => {
       if (!user) navigate('/welcome')
+      else if (user.is_admin) navigate('/admin') // admin entra direto no back-office
       else if (!onboarded) navigate('/genres')
       else navigate('/home')
     }, 1800)
