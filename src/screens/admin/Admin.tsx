@@ -135,8 +135,12 @@ export function Admin() {
     await loadList()
   }
   const removeBook = async (b: AdminBook) => {
-    if (!confirm(`Apagar "${b.title}"? (o ficheiro no R2 mantém-se)`)) return
+    // Apagar é irreversível (perde os metadados; para só esconder, usa Despublicar).
+    // Exige escrever o título — evita apagões acidentais como o que perdeu o catálogo.
+    const typed = prompt(`Apagar "${b.title}" é permanente e perde os metadados. Para só o esconder, cancela e usa Despublicar.\n\nPara confirmar, escreve o título exacto:`)
+    if (typed?.trim() !== b.title) { if (typed !== null) setMsg('Título não confere — nada apagado.'); return }
     await (await import('../../data/api/admin')).deleteBook(b.id).catch(() => {})
+    setMsg(`"${b.title}" apagado.`)
     await loadList()
   }
   const changeReq = async (id: string, status: string) => {
