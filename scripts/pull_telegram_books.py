@@ -44,6 +44,29 @@ except ImportError as e:
     sys.exit(f"Falta uma dependência ({e.name}): pip install telethon ebooklib boto3")
 
 
+def load_dotenv(path: Path):
+    """Lê KEY=VALUE de um .env (evita depender de `source`/shell). Vars já no
+    ambiente ganham (setdefault). Ignora comentários e comentários inline ` # ...`."""
+    if not path.exists():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        key, sep, val = line.partition("=")
+        if not sep:
+            continue
+        val = re.split(r"\s+#", val.strip(), maxsplit=1)[0].strip()
+        if val.startswith("#"):  # linha "KEY=   # comentário" → valor vazio
+            val = ""
+        os.environ.setdefault(key.strip(), val)
+
+
+# Carrega o .env.import (raiz do projeto), corras de onde correres.
+for _p in (Path.cwd() / ".env.import", Path(__file__).resolve().parent.parent / ".env.import"):
+    load_dotenv(_p)
+
+
 def env(*names, required=True, default=None):
     for n in names:
         v = os.environ.get(n)
