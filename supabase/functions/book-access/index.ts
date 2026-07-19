@@ -10,8 +10,9 @@ const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const R2_ACCOUNT = Deno.env.get('R2_ACCOUNT_ID')!
 const R2_KEY = Deno.env.get('R2_ACCESS_KEY_ID')!
 const R2_SECRET = Deno.env.get('R2_SECRET_ACCESS_KEY')!
-// Bucket privado só de EPUBs (as capas vivem no bucket público, à parte).
-const R2_BUCKET = Deno.env.get('R2_EPUB_BUCKET') ?? Deno.env.get('R2_BUCKET') ?? 'zuri-epubs'
+// Bucket privado dos EPUBs (zuri-books, Public Access desligado). As capas vivem
+// noutro bucket, público. Aqui só se lêem EPUBs.
+const R2_BUCKET = Deno.env.get('R2_EPUB_BUCKET') ?? Deno.env.get('R2_BUCKET') ?? 'zuri-books'
 
 const cors = {
   'Access-Control-Allow-Origin': '*',

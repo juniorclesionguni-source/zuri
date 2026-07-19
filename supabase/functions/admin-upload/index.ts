@@ -11,8 +11,10 @@ const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const R2_ACCOUNT = Deno.env.get('R2_ACCOUNT_ID')!
 const R2_KEY = Deno.env.get('R2_ACCESS_KEY_ID')!
 const R2_SECRET = Deno.env.get('R2_SECRET_ACCESS_KEY')!
-const R2_EPUB_BUCKET = Deno.env.get('R2_EPUB_BUCKET') ?? 'zuri-epubs'   // privado
-const R2_COVER_BUCKET = Deno.env.get('R2_COVER_BUCKET') ?? Deno.env.get('R2_BUCKET') ?? 'zuri-books' // público
+// EPUBs no bucket privado (zuri-books). Capas no bucket público (definir R2_COVER_BUCKET
+// com o nome do bucket que responde no VITE_R2_PUBLIC_URL).
+const R2_EPUB_BUCKET = Deno.env.get('R2_EPUB_BUCKET') ?? Deno.env.get('R2_BUCKET') ?? 'zuri-books'
+const R2_COVER_BUCKET = Deno.env.get('R2_COVER_BUCKET') ?? R2_EPUB_BUCKET
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -54,9 +56,9 @@ Deno.serve(async (req) => {
     if (!SLUG.test(String(bookId ?? ''))) return json({ error: 'bookId inválido' }, 400)
     const ext = ['jpg', 'jpeg', 'png', 'webp'].includes(coverExt) ? coverExt : 'jpg'
     return json({
-      epubUrl: epub ? await presignPut(R2_EPUB_BUCKET, `epubs/${bookId}.epub`) : undefined,
+      epubUrl: epub ? await presignPut(R2_EPUB_BUCKET, `${bookId}.epub`) : undefined,
       coverUrl: cover ? await presignPut(R2_COVER_BUCKET, `covers/${bookId}.${ext}`) : undefined,
-      epubPath: epub ? `epubs/${bookId}.epub` : undefined,
+      epubPath: epub ? `${bookId}.epub` : undefined,
       coverPath: cover ? `covers/${bookId}.${ext}` : undefined,
     })
   }
