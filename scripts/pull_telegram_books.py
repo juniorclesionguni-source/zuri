@@ -148,8 +148,12 @@ async def main():
     client = TelegramClient("zuri_tg", int(TG_API_ID), TG_API_HASH)
     await client.start()  # telefone+código no 1º arranque (só tu os introduzes)
 
+    # Canal privado por id ("-100...") só resolve depois de o Telethon ver os teus diálogos.
+    await client.get_dialogs()
+    channel = int(TG_CHANNEL) if re.fullmatch(r"-?\d+", TG_CHANNEL.strip()) else TG_CHANNEL
+
     imported, skipped = 0, 0
-    async for msg in client.iter_messages(TG_CHANNEL):
+    async for msg in client.iter_messages(channel):
         name = epub_filename(msg)
         if not name:
             continue
