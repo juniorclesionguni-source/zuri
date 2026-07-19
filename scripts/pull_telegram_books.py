@@ -34,14 +34,16 @@ from pathlib import Path
 
 DRY = "--dry-run" in sys.argv
 
+import zipfile
+import posixpath
+import xml.etree.ElementTree as ET
+
 try:
     from telethon import TelegramClient
     from telethon.tl.types import DocumentAttributeFilename
-    import ebooklib
-    from ebooklib import epub
     import boto3
 except ImportError as e:
-    sys.exit(f"Falta uma dependência ({e.name}): pip install telethon ebooklib boto3")
+    sys.exit(f"Falta uma dependência ({e.name}): pip install telethon boto3")
 
 
 def load_dotenv(path: Path):
@@ -111,22 +113,68 @@ def epub_filename(msg) -> str | None:
     return None
 
 
+def _local(tag: str) -> str:
+    return tag.rsplit("}", 1)[-1]  # ignora namespace
+
+
 def read_metadata(path: Path):
-    """(title, author, cover_bytes, cover_ext, words) a partir do EPUB."""
-    book = epub.read_epub(str(path))
-    dc = lambda k: (book.get_metadata("DC", k) or [("", {})])[0][0]
-    title = dc("title") or path.stem
-    author = dc("creator") or ""
-    cover_bytes, cover_ext = None, None
-    for item in book.get_items_of_type(ebooklib.ITEM_IMAGE):
-        if "cover" in item.get_name().lower():
-            cover_bytes = item.get_content()
-            cover_ext = item.get_name().rsplit(".", 1)[-1].lower()
-            break
-    words = 0
-    for item in book.get_items_of_type(ebooklib.ITEM_DOCUMENT):
-        text = re.sub(r"<[^>]+>", " ", item.get_content().decode("utf-8", "ignore"))
-        words += len(text.split())
+    """(title, author, cover_bytes, cover_ext, words) lendo o EPUB como zip.
+    Não usa ebooklib de propósito — ele estoira em livros que referenciam fontes
+    ausentes. Aqui, uma capa/spine em falta é ignorada, não fatal."""
+    with zipfile.ZipFile(path) as z:  # BadZipFile aqui → apanhado no loop, salta
+        names = set(z.namelist())
+        # 1) container.xml → caminho do .opf
+        container = ET.fromstring(z.read("META-INF/container.xml"))
+        opf_path = next(
+            e.get("full-path") for e in container.iter() if _local(e.tag) == "rootfile"
+        )
+        base = posixpath.dirname(opf_path)
+        opf = ET.fromstring(z.read(opf_path))
+
+        title, author, cover_id, manifest, spine = path.stem, "", None, {}, []
+        for e in opf.iter():
+            tag = _local(e.tag)
+            if tag == "title" and e.text and title == path.stem:
+                title = e.text.strip()
+            elif tag == "creator" and e.text and not author:
+                author = e.text.strip()
+            elif tag == "meta" and e.get("name") == "cover":
+                cover_id = e.get("content")
+            elif tag == "item":
+                manifest[e.get("id")] = (e.get("href"), e.get("properties") or "")
+            elif tag == "itemref":
+                spine.append(e.get("idref"))
+
+        resolve = lambda href: posixpath.normpath(posixpath.join(base, href))
+
+        # 2) capa: <meta name=cover> ou item com properties="cover-image"
+        cover_bytes, cover_ext = None, None
+        cover_href = None
+        if cover_id and cover_id in manifest:
+            cover_href = manifest[cover_id][0]
+        else:
+            for href, props in manifest.values():
+                if "cover-image" in props:
+                    cover_href = href
+                    break
+        if cover_href:
+            key = resolve(cover_href)
+            if key in names:
+                cover_bytes = z.read(key)
+                cover_ext = cover_href.rsplit(".", 1)[-1].lower()
+
+        # 3) contagem de palavras pelo spine (ficheiros em falta: ignorados)
+        words = 0
+        for idref in spine:
+            item = manifest.get(idref)
+            if not item:
+                continue
+            key = resolve(item[0])
+            if key not in names:
+                continue
+            text = re.sub(r"<[^>]+>", " ", z.read(key).decode("utf-8", "ignore"))
+            words += len(text.split())
+
     return title, author, cover_bytes, cover_ext, words
 
 
@@ -190,8 +238,10 @@ async def main():
 
             title, author, cover, cover_ext, words = read_metadata(dest)
             book_id = slugify(title)
-            # Sem título real (ou título = hash do ficheiro) → não vale a pena importar.
-            if not book_id or re.fullmatch(r"[0-9a-f]{16,}", book_id):
+            # Sem título real (hash, UUID, ou caminho de ficheiro) → não vale importar.
+            junk = re.fullmatch(r"[0-9a-f]{16,}", book_id) or re.fullmatch(
+                r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f-]+", book_id)
+            if not book_id or junk:
                 print(f"  ⚠ {name}: sem título utilizável — ignorado")
                 bad += 1
                 continue
