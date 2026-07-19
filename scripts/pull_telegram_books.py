@@ -175,47 +175,57 @@ async def main():
     await client.get_dialogs()
     channel = int(TG_CHANNEL) if re.fullmatch(r"-?\d+", TG_CHANNEL.strip()) else TG_CHANNEL
 
-    imported, skipped = 0, 0
+    imported, skipped, bad = 0, 0, 0
     async for msg in client.iter_messages(channel):
         name = epub_filename(msg)
         if not name:
             continue
-        dest = OUT / name
-        if not (dest.exists() and dest.stat().st_size > 0):
-            print(f"↓ {name}")
-            await msg.download_media(file=str(dest))
+        # Um ficheiro estragado (zip inválido, sem metadados, upload falhado) não pode
+        # abortar a corrida inteira — salta-se com aviso e segue-se.
+        try:
+            dest = OUT / name
+            if not (dest.exists() and dest.stat().st_size > 0):
+                print(f"↓ {name}")
+                await msg.download_media(file=str(dest))
 
-        title, author, cover, cover_ext, words = read_metadata(dest)
-        book_id = slugify(title)
-        if not book_id:
-            print(f"  ⚠ sem título utilizável em {name} — ignorado")
-            continue
-        if not DRY and book_exists(book_id):
-            skipped += 1
-            continue
+            title, author, cover, cover_ext, words = read_metadata(dest)
+            book_id = slugify(title)
+            # Sem título real (ou título = hash do ficheiro) → não vale a pena importar.
+            if not book_id or re.fullmatch(r"[0-9a-f]{16,}", book_id):
+                print(f"  ⚠ {name}: sem título utilizável — ignorado")
+                bad += 1
+                continue
+            if not DRY and book_exists(book_id):
+                skipped += 1
+                continue
 
-        epub_key = f"{book_id}.epub"
-        cover_key = f"covers/{book_id}.{cover_ext or 'jpg'}" if cover else None
-        print(f"  → {title} — {author or '(autor?)'}  [{book_id}]")
-        if DRY:
-            continue
+            epub_key = f"{book_id}.epub"
+            cover_key = f"covers/{book_id}.{cover_ext or 'jpg'}" if cover else None
+            print(f"  → {title} — {author or '(autor?)'}  [{book_id}]")
+            if DRY:
+                imported += 1
+                continue
 
-        s3.put_object(Bucket=R2_EPUB_BUCKET, Key=epub_key,
-                      Body=dest.read_bytes(), ContentType="application/epub+zip")
-        if cover:
-            s3.put_object(Bucket=R2_COVER_BUCKET, Key=cover_key,
-                          Body=cover, ContentType=f"image/{'png' if cover_ext == 'png' else 'jpeg'}")
-        insert_book({
-            "id": book_id, "title": title, "author": author,
-            "epub_path": epub_key, "cover_path": cover_key,
-            "pages": round(words / 300) or None, "mins": round(words / 200) or None,
-            "is_published": False,  # revê no /admin (género, capa) e publica
-        })
-        imported += 1
+            s3.put_object(Bucket=R2_EPUB_BUCKET, Key=epub_key,
+                          Body=dest.read_bytes(), ContentType="application/epub+zip")
+            if cover:
+                s3.put_object(Bucket=R2_COVER_BUCKET, Key=cover_key,
+                              Body=cover, ContentType=f"image/{'png' if cover_ext == 'png' else 'jpeg'}")
+            insert_book({
+                "id": book_id, "title": title, "author": author,
+                "epub_path": epub_key, "cover_path": cover_key,
+                "pages": round(words / 300) or None, "mins": round(words / 200) or None,
+                "is_published": False,  # revê no /admin (género, capa) e publica
+            })
+            imported += 1
+        except Exception as e:
+            print(f"  ⚠ {name}: {type(e).__name__} — ignorado ({e})")
+            bad += 1
+            continue
 
     await client.disconnect()
     verb = "importaria" if DRY else "importados"
-    print(f"\nPronto: {imported} {verb}, {skipped} já existiam.")
+    print(f"\nPronto: {imported} {verb}, {skipped} já existiam, {bad} ignorados (ficheiros maus).")
     if imported and not DRY:
         print("Vai ao /admin → Catálogo: define o género e publica cada um.")
 
