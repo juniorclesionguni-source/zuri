@@ -5,6 +5,7 @@ import { BookCover } from '../../components/ui/BookCover'
 import { Icon } from '../../components/ui/Icon'
 import { ZuriMark } from '../../components/ui/ZuriMark'
 import { QUOTE } from '../../data/catalog'
+import { recommend } from '../../data/recommend'
 import { useAuthStore } from '../../store/auth'
 import { useCatalog } from '../../store/catalog'
 import { useLibrary } from '../../store/library'
@@ -31,6 +32,7 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
   const catalogError = useCatalog((s) => s.error)
   const retry = useCatalog((s) => s.retry)
   const progress = useLibrary((s) => s.progress)
+  const favorites = useLibrary((s) => s.favorites)
   const unread = useNotifications((s) => s.unread)
   const dark = useUIStore((s) => s.dark)
   const toggleDark = useUIStore((s) => s.toggleDark)
@@ -45,6 +47,8 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
   const progressBook = books
     .filter((b) => { const p = progress[b.id]; return p && p.pct > 0 && p.pct < 95 })
     .sort((a, b) => (progress[b.id]?.updatedAt ?? 0) - (progress[a.id]?.updatedAt ?? 0))[0] ?? null
+
+  const suggestions = recommend({ books, genres: user?.genres ?? [], favorites, progress, limit: 4 })
 
   return (
     <div style={{ width: '100%', height: '100%', background: 'var(--bg)', overflowY: 'auto', paddingBottom: 96 }}>
@@ -125,7 +129,7 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
                   <div style={{ ...skeletonShimmer(undefined, 4), height: 10, width: '55%', marginTop: 6 }} />
                 </div>
               ))
-            : books.slice(1, 5).map((b) => (
+            : suggestions.map((b) => (
                 <BookCard key={b.id} book={b} onClick={() => navigate(`/book/${b.id}`)} fluid />
               ))}
         </div>
@@ -135,7 +139,7 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
       <div style={{ marginTop: 32 }}>
         <SectionHeader action="Ver tudo">Novidades no Zuri</SectionHeader>
         <div className="hide-scrollbar" style={{ display: 'flex', gap: 14, overflowX: 'auto', padding: '0 20px' }}>
-          {books.slice(5, 10).map((b) => (
+          {books.filter((b) => !suggestions.some((s) => s.id === b.id)).slice(5, 10).map((b) => (
             <div key={b.id} style={{ position: 'relative' }}>
               <BookCard book={b} onClick={() => navigate(`/book/${b.id}`)} w={120} />
               <div style={{ position: 'absolute', top: 8, left: 8, padding: '3px 7px', background: 'var(--accent)', color: '#FEF8F5', fontFamily: 'var(--sans)', fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', borderRadius: 3 }}>NOVO</div>
