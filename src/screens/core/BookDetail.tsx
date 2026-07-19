@@ -10,7 +10,6 @@ import { useCatalog } from '../../store/catalog'
 import { useSubStore, canReadOffline, graceEndsAt, formatExpiresAt } from '../../store/subscription'
 import { useAuthStore } from '../../store/auth'
 import { useLibrary } from '../../store/library'
-import { isSupabaseConfigured } from '../../lib/supabaseConfig'
 import { content } from '../../data/services'
 
 export function BookDetail() {
@@ -57,10 +56,8 @@ export function BookDetail() {
     if (status !== 'active') { navigate('/paywall'); return } // download é para subscritores
     setDlPct(0)
     try {
-      // Com backend, o bucket é privado — pedir URL assinado; em mock usa o path directo.
-      const url = isSupabaseConfigured
-        ? (await content.getBookUrl(book.id)).url
-        : book.epub_path
+      // Bucket privado — pede sempre URL assinado ao book-access.
+      const { url } = await content.getBookUrl(book.id)
       await downloadBook(book.id, url, (p) => setDlPct(p))
     } catch { /* falha silenciosa */ }
     finally { setDlPct(null) }

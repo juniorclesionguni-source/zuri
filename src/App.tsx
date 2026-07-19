@@ -8,7 +8,6 @@ import { useStatsStore } from './store/stats'
 import { useLibrary } from './store/library'
 import { useNotifications } from './store/notifications'
 import { useSubStore } from './store/subscription'
-import { isSupabaseConfigured } from './lib/supabaseConfig'
 import { auth } from './data/services'
 
 import { Splash } from './screens/onboarding/Splash'
@@ -126,9 +125,8 @@ export default function App() {
     else html.removeAttribute('data-dark')
   }, [dark])
 
-  // Hidratação de sessão: só com backend real. Servidor é a fonte de verdade.
+  // Hidratação de sessão. Servidor é a fonte de verdade.
   useEffect(() => {
-    if (!isSupabaseConfigured) return
     let unsub = () => {}
     auth.subscribe(hydrate).then((fn) => { unsub = fn })
     return () => unsub()
@@ -146,7 +144,7 @@ export default function App() {
     if (user?.id) {
       useStatsStore.getState().load(user.id)
       useNotifications.getState().load(user.id)
-      if (isSupabaseConfigured) useSubStore.getState().hydrate(user.id)
+      useSubStore.getState().hydrate(user.id)
     }
   }, [user?.id])
 

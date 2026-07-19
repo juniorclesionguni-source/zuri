@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { PrimaryButton, GhostButton } from '../../components/ui/Button'
 import { useSubStore } from '../../store/subscription'
-import { isSupabaseConfigured } from '../../lib/supabaseConfig'
+import { PAYMENT_SIMULATED } from '../../lib/paymentConfig'
 import { mpesa } from '../../data/services'
 import { useAuthStore } from '../../store/auth'
 
@@ -17,8 +17,8 @@ export function Processing() {
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
-    // Modo mock (sem backend ou sem txId): confirmação simulada.
-    if (!isSupabaseConfigured || !txId) {
+    // M-Pesa ainda não ligado (ou sem txId): confirmação simulada.
+    if (PAYMENT_SIMULATED || !txId) {
       const t = setTimeout(() => {
         setActive(state?.days)
         navigate('/success')

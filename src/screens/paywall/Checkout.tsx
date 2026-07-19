@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Icon } from '../../components/ui/Icon'
 import { PrimaryButton } from '../../components/ui/Button'
 import { useSubStore } from '../../store/subscription'
-import { isSupabaseConfigured } from '../../lib/supabaseConfig'
+import { PAYMENT_SIMULATED } from '../../lib/paymentConfig'
 import { mpesa } from '../../data/services'
 import { getPlan, DEFAULT_PLAN, type PlanId } from '../../data/plans'
 
@@ -23,8 +23,8 @@ export function Checkout() {
       return
     }
     setError('')
-    if (!isSupabaseConfigured) {
-      // Modo mock (sem backend): fluxo simulado.
+    if (PAYMENT_SIMULATED) {
+      // M-Pesa ainda não ligado — fluxo simulado (ver src/lib/paymentConfig.ts).
       setPending()
       navigate('/processing', { state: { days: plan.days } })
       return

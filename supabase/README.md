@@ -32,15 +32,20 @@ supabase/
 política de escrita em `subscriptions`/`payments`; o flip vem do worker M-Pesa
 com a `service_role key` (que ignora RLS) chamando `activate_subscription()`.
 
-## Storage (Cloudflare R2)
+## Storage (Cloudflare R2) — dois buckets
 
-Bucket único **`zuri-books`** (o nome antigo "zuri-epubs" em comentários está obsoleto):
-- `epubs/…` — **privado**. Único acesso é via `book-access` (URL assinado 120 s;
+Os nomes são invertidos face ao que o senso comum sugeriria — confirma sempre
+no dashboard antes de mexer:
+
+- **`zuri-books`** — **privado** (Public Access: Disabled). Guarda os EPUBs na
+  raiz (`<id>.epub`). Único acesso é via `book-access` (URL assinado 120 s;
   `sample: true` para não-subscritores — o Reader limita ao 1º capítulo).
-- `covers/…` — público via `VITE_R2_PUBLIC_URL` (o domínio público serve só capas).
+- **`zuri-epubs`** — **público**, ligado ao domínio `VITE_R2_PUBLIC_URL`. Guarda
+  só `covers/…`. Apesar do nome, não deve ter EPUBs — se tiver, estão
+  publicamente descarregáveis (fura o paywall).
 
-⚠️ Acção manual: desligar o acesso público aos EPUBs no dashboard do R2
-(o domínio público não deve expor `epubs/`).
+Secrets das Edge Functions (`book-access`, `admin-upload`):
+`R2_EPUB_BUCKET=zuri-books`, `R2_COVER_BUCKET=zuri-epubs`.
 
 Upload de livros: painel `/admin` na app (Edge Function `admin-upload`,
 presigned PUT) — o fluxo antigo de migrations SQL + scripts está retirado.
@@ -69,11 +74,14 @@ VITE_SUPABASE_URL=https://<REF>.supabase.co
 VITE_SUPABASE_ANON_KEY=<anon-key>
 ```
 
-A `service_role key` **nunca** entra no cliente — só no worker M-Pesa (servidor).
+A `service_role key` **nunca** entra no cliente — só nas Edge Functions (servidor).
 
-## A seguir
+## Estado
 
-1. Cliente Supabase em `src/lib/supabase.ts` + swap dos mocks em `src/data/mock/*`
-   (mesmas assinaturas → zero alterações de UI).
-2. Worker Cloudflare para o callback M-Pesa → `activate_subscription()`.
-3. Upload dos EPUBs para R2 e preencher `books.epub_path`.
+Catálogo, leitor, admin e planos correm todos contra o backend real — nada de
+mock no cliente. Só o **pagamento** ainda é simulado (`src/lib/paymentConfig.ts`,
+`PAYMENT_SIMULATED = true`) enquanto as credenciais sandbox do M-Pesa
+(`MPESA_API_KEY`, `MPESA_PUBLIC_KEY`, `MPESA_SERVICE_PROVIDER_CODE`) não estiverem
+configuradas como secrets da function. Depois de as ligar: `supabase secrets set …`,
+redeploy de `mpesa-initiate`/`mpesa-callback`, e apagar o ramo simulado em
+`Checkout.tsx`/`Processing.tsx`.

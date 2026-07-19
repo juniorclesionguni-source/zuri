@@ -8,7 +8,6 @@ import { useLibrary } from '../../store/library'
 import { useAuthStore } from '../../store/auth'
 import { saveProgress, getProgress, logSession, getOfflineBook } from '../../data/db'
 import { progress as progressApi, content as contentApi } from '../../data/services'
-import { isSupabaseConfigured } from '../../lib/supabaseConfig'
 
 const THEMES: Record<string, { bg: string; text: string }> = {
   claro:  { bg: '#FEF8F5', text: '#3A2020' },
@@ -89,22 +88,17 @@ export function Reader() {
     ;(async () => {
       try {
         const ePub = (await import('epubjs')).default
-        // Descarregado → blob local (offline). Senão, com backend → URL assinado do
-        // book-access (sample=true limita ao 1º capítulo). Sem backend (mock) → epub_path directo.
-        // Blob offline vale para subscritores e durante a graça pós-expiração;
-        // fora dela cai para o fluxo online (que devolve sample p/ não-subscritores).
+        // Descarregado → blob local (offline). Senão, URL assinado do book-access
+        // (sample=true limita ao 1º capítulo). Blob offline vale para subscritores e
+        // durante a graça pós-expiração; fora dela cai para o fluxo online.
         const { canReadOffline } = await import('../../store/subscription')
         const offline = id && canReadOffline() ? await getOfflineBook(id) : undefined
         let source: any = offline?.data
         let sample = false
-        if (!source) {
-          if (isSupabaseConfigured && id) {
-            const r = await contentApi.getBookUrl(id)
-            source = r.url
-            sample = r.sample
-          } else {
-            source = book!.epub_path!
-          }
+        if (!source && id) {
+          const r = await contentApi.getBookUrl(id)
+          source = r.url
+          sample = r.sample
         }
         sampleRef.current = sample
         epubInstance = ePub(source)

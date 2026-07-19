@@ -7,7 +7,7 @@ interface SubState {
   status: SubStatus
   expiresAt: string | null // ISO; formatar só na exibição
   setPending: () => void
-  setActive: (days?: number) => void // caminho mock (sem Supabase)
+  setActive: (days?: number) => void // caminho de pagamento simulado — ver src/lib/paymentConfig.ts
   setFromServer: (s: { status: string; expiresAt: string | null }) => void
   hydrate: (userId: string) => Promise<void>
 }

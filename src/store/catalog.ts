@@ -23,12 +23,6 @@ export const useCatalog = create<CatalogState>()((set, get) => ({
     // Cache-first: mostra já o que está no Dexie e actualiza da rede em background.
     const cached = await dbmod.getCachedBooks().catch(() => [] as Book[])
     if (cached.length) set({ books: cached, loaded: true, loading: false })
-    const { isSupabaseConfigured } = await import('../lib/supabaseConfig')
-    if (!isSupabaseConfigured) {
-      // Modo mock: só a cache Dexie (vazia na primeira execução — catálogo vazio honesto).
-      if (!cached.length) set({ books: [], loaded: true, loading: false })
-      return
-    }
     const { fetchBooks } = await import('../data/api/catalog')
     const fresh = await fetchBooks().catch(() => [] as Book[])
     if (fresh.length) {

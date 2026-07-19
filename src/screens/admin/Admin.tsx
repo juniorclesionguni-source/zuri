@@ -4,7 +4,6 @@ import { PrimaryButton, GhostButton } from '../../components/ui/Button'
 import { Icon } from '../../components/ui/Icon'
 import { ZuriMark } from '../../components/ui/ZuriMark'
 import { useAuthStore } from '../../store/auth'
-import { isSupabaseConfigured } from '../../lib/supabaseConfig'
 import type { AdminBook, AdminStats, BookRequest } from '../../data/api/admin'
 
 const GENRES = ['Romance', 'Ficção', 'História', 'Poesia', 'Ensaio', 'Suspense', 'Biografia', 'Des. Pessoal']
@@ -43,7 +42,7 @@ export function Admin() {
   const [busy, setBusy] = useState('')
   const [msg, setMsg] = useState('')
 
-  const isAdmin = isSupabaseConfigured && !!user?.is_admin
+  const isAdmin = !!user?.is_admin
 
   const loadList = async () => { setBooks(await (await import('../../data/api/admin')).fetchAllBooks()) }
   const loadStats = async () => { setStats(await (await import('../../data/api/admin')).fetchStats().catch(() => null)) }
