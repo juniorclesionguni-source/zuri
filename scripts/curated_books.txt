@@ -1,0 +1,70 @@
+# Curadoria de lançamento — os títulos mais famosos/bem avaliados do canal.
+# O importador só traz os slugs listados aqui (uma linha cada; texto após # é comentário).
+# Para importar TUDO em vez disto, apaga/renomeia este ficheiro (ou usa --all).
+# Edita à vontade: acrescenta ou remove slugs conforme quiseres.
+
+# --- Romance / BookTok ---
+e-assim-que-acaba                       # É Assim que Acaba — Colleen Hoover
+tarde-demais                            # Tarde Demais — Colleen Hoover
+quarta-asa                              # Quarta Asa (Fourth Wing) — Rebecca Yarros
+chama-de-ferro                          # Chama de Ferro (Iron Flame) — Rebecca Yarros
+tempestade-de-onix                      # Tempestade de Ônix (Onyx Storm) — Rebecca Yarros
+amor-teoricamente                       # Amor, Teoricamente — Ali Hazelwood
+xeque-mate                              # Xeque-mate (Check & Mate) — Ali Hazelwood
+nao-e-amor                              # Não é Amor — Ali Hazelwood
+no-fundo-e-amor                         # No Fundo é Amor — Ali Hazelwood
+jogo-de-amor-para-dois                  # Jogo de Amor para Dois — Ali Hazelwood
+uma-vida-e-tanto                        # Uma Vida e Tanto — Emily Henry
+nem-te-conto                            # Nem te Conto — Emily Henry
+o-amor-que-partiu-o-mundo               # O Amor que Partiu o Mundo — Emily Henry
+
+# --- Fantasia / Romantasy ---
+alchemised                              # Alchemised — SenLinYu
+a-serpente-e-as-asas-feitas-de-noite    # A Serpente e as Asas Feitas de Noite — Carissa Broadbent
+a-maldicao-do-verdadeiro-amor           # A Maldição do Verdadeiro Amor — Stephanie Garber
+box-o-povo-do-ar                        # O Povo do Ar (box) — Holly Black
+
+# --- Thriller / Suspense ---
+a-professora                            # A Professora — Freida McFadden
+nunca-minta                             # Nunca Minta — Freida McFadden
+a-porta-trancada                        # A Porta Trancada — Freida McFadden
+a-verdade-sobre-o-caso-harry-quebert    # A Verdade Sobre o Caso Harry Quebert — Joël Dicker
+a-furia                                 # A Fúria — Alex Michaelides
+a-estranha-sally-diamond                # A Estranha Sally Diamond — Liz Nugent
+garota-invisivel                        # Garota Invisível — Lisa Jewell
+a-noite-em-que-ela-desapareceu          # A Noite em que Ela Desapareceu — Lisa Jewell
+lugar-errado-hora-errada                # Lugar Errado, Hora Errada — Gillian McAllister
+o-ultimo-jantar                         # O Último Jantar — Shari Lapena
+todas-as-coisas-perigosas               # Todas as Coisas Perigosas — Stacy Willingham
+o-massacre-da-familia-hope              # O Massacre da Família Hope — Riley Sager
+a-casa-do-outro-lado-do-lago            # A Casa do Outro Lado do Lago — Riley Sager
+anna-o                                  # Anna O — Matthew Blake
+entre-quatro-paredes                    # Entre Quatro Paredes — B. A. Paris
+mais-sombrio                            # Mais Sombrio — Stephen King
+uma-centelha-de-luz                     # Uma Centelha de Luz — Jodi Picoult
+a-loucura-do-mel                        # A Loucura do Mel — Jodi Picoult
+
+# --- Ficção / Clássicos / Feel-good ---
+cem-anos-de-solidao-ilustrado           # Cem Anos de Solidão — Gabriel García Márquez
+emma                                    # Emma — Jane Austen
+belo-mundo-onde-voce-esta               # Belo Mundo, Onde Você Está — Sally Rooney
+o-gato-que-amava-livros                 # O Gato que Amava Livros — Sosuke Natsukawa
+a-biblioteca-dos-sonhos-secretos        # A Biblioteca dos Sonhos Secretos — Michiko Aoyama
+antes-que-o-cafe-esfrie-3               # Antes que o Café Esfrie 3 — Toshikazu Kawaguchi
+os-cem-anos-de-lenni-e-margot           # Os Cem Anos de Lenni e Margot — Marianne Cronin
+o-livro-do-conforto                     # O Livro do Conforto — Matt Haig
+
+# --- Não-ficção / Desenvolvimento pessoal ---
+a-geracao-ansiosa                       # A Geração Ansiosa — Jonathan Haidt
+mindset                                 # Mindset — Carol Dweck
+outlive-a-arte-e-a-ciencia-de-viver-mais-e-melhor   # Outlive — Peter Attia
+supercomunicadores                      # Supercomunicadores — Charles Duhigg
+o-homem-mais-rico-da-babilonia-edicao-integral      # O Homem Mais Rico da Babilônia — G. S. Clason
+como-ficar-rico                         # Como Ficar Rico — Ramit Sethi
+nudge-como-tomar-melhores-decisoes-sobre-saude-dinheiro-e-felici   # Nudge — Thaler & Sunstein
+disciplina-e-destino                    # Disciplina é Destino — Ryan Holiday
+hygge                                   # Hygge — Meik Wiking
+tdah-como-lidar                         # TDAH: Como Lidar — Jessica McCabe
+inteligente-mas-disperso                # Inteligente mas Disperso — Dawson & Guare
+a-musica-no-seu-cerebro-nova-edicao     # A Música no Seu Cérebro — Daniel Levitin
+inteligencia-social-a-ciencia-revolucionaria-das-relacoes-humana   # Inteligência Social — Daniel Goleman

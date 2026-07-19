@@ -33,6 +33,25 @@ import urllib.request
 from pathlib import Path
 
 DRY = "--dry-run" in sys.argv
+ALL = "--all" in sys.argv  # ignora a curadoria e importa tudo
+
+
+def load_curated() -> set[str]:
+    """Slugs a importar (scripts/curated_books.txt). Vazio = importar tudo."""
+    if ALL:
+        return set()
+    f = Path(__file__).resolve().parent / "curated_books.txt"
+    if not f.exists():
+        return set()
+    slugs = set()
+    for line in f.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            slugs.add(re.split(r"\s+#|\s+", line, maxsplit=1)[0])
+    return slugs
+
+
+CURATED = load_curated()
 
 import zipfile
 import posixpath
@@ -223,7 +242,9 @@ async def main():
     await client.get_dialogs()
     channel = int(TG_CHANNEL) if re.fullmatch(r"-?\d+", TG_CHANNEL.strip()) else TG_CHANNEL
 
-    imported, skipped, bad = 0, 0, 0
+    if CURATED:
+        print(f"Curadoria activa: {len(CURATED)} títulos (usa --all para importar tudo).")
+    imported, skipped, bad, off = 0, 0, 0, 0
     async for msg in client.iter_messages(channel):
         name = epub_filename(msg)
         if not name:
@@ -244,6 +265,9 @@ async def main():
             if not book_id or junk:
                 print(f"  ⚠ {name}: sem título utilizável — ignorado")
                 bad += 1
+                continue
+            if CURATED and book_id not in CURATED:
+                off += 1  # fora da curadoria — não importa (mas fica baixado)
                 continue
             if not DRY and book_exists(book_id):
                 skipped += 1
@@ -275,7 +299,8 @@ async def main():
 
     await client.disconnect()
     verb = "importaria" if DRY else "importados"
-    print(f"\nPronto: {imported} {verb}, {skipped} já existiam, {bad} ignorados (ficheiros maus).")
+    extra = f", {off} fora da curadoria" if CURATED else ""
+    print(f"\nPronto: {imported} {verb}, {skipped} já existiam, {bad} maus{extra}.")
     if imported and not DRY:
         print("Vai ao /admin → Catálogo: define o género e publica cada um.")
 
