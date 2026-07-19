@@ -19,6 +19,9 @@ const THEMES: Record<string, { bg: string; text: string }> = {
 
 const LH: Record<string, string> = { Compacto: '1.4', Normal: '1.65', Arejado: '1.9' }
 
+// Amostra grátis: percentagem do livro que um não-subscritor pode ler antes do paywall.
+const SAMPLE_PCT = 10
+
 export function Reader() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -149,15 +152,16 @@ export function Reader() {
 
         let turns = 0
         renditionInstance.on('relocated', (loc: any) => {
-          // Amostra: passou do 1º item do spine → overlay de paywall (bloqueia a leitura).
-          if (sampleRef.current && loc.start.index > 0) setSampleEnded(true)
           turns++
-          let pct = epubInstance.locations?.total
-            ? Math.round(epubInstance.locations.percentageFromCfi(loc.start.cfi) * 100)
-            : 0
+          const hasLoc = !!epubInstance.locations?.total
+          let pct = hasLoc ? Math.round(epubInstance.locations.percentageFromCfi(loc.start.cfi) * 100) : 0
           // A partir da 3ª página conta como "a ler", mesmo que a % ainda arredonde a 0.
           if (turns >= 3) pct = Math.max(pct, 1)
           setProg(pct)
+          // Amostra grátis: cortada a SAMPLE_PCT% do livro. Não se corta por spine index
+          // (capa/rosto/índice são items separados → cortaria logo na 2ª página); só depois
+          // de as locations existirem, senão a % é 0 e bloquearia cedo demais.
+          if (sampleRef.current && hasLoc && pct >= SAMPLE_PCT) setSampleEnded(true)
         })
 
         // Locations dão a % exacta mas é um loop pesado — adiado para não travar o scroll inicial.
