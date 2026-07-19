@@ -54,18 +54,20 @@ def env(*names, required=True, default=None):
     return default
 
 
+# Telegram: sempre necessário (mesmo em --dry-run, que só descarrega e lista).
 TG_API_ID = env("TG_API_ID")
 TG_API_HASH = env("TG_API_HASH")
 TG_CHANNEL = env("TG_CHANNEL")
 OUT = Path(env("TG_OUT", required=False, default=str(Path.home() / "Documents" / "livros")))
 
-R2_ACCOUNT = env("R2_ACCOUNT_ID")
-R2_KEY = env("R2_ACCESS_KEY_ID")
-R2_SECRET = env("R2_SECRET_ACCESS_KEY")
+# R2 + Supabase: só necessários para importar de verdade. Em --dry-run ficam vazios.
+R2_ACCOUNT = env("R2_ACCOUNT_ID", required=not DRY)
+R2_KEY = env("R2_ACCESS_KEY_ID", required=not DRY)
+R2_SECRET = env("R2_SECRET_ACCESS_KEY", required=not DRY)
 R2_EPUB_BUCKET = env("R2_EPUB_BUCKET", required=False, default="zuri-books")
 R2_COVER_BUCKET = env("R2_COVER_BUCKET", required=False, default="zuri-epubs")
-SB_URL = env("SUPABASE_URL").rstrip("/")
-SB_KEY = env("SUPABASE_SERVICE_ROLE_KEY")
+SB_URL = (env("SUPABASE_URL", required=not DRY) or "").rstrip("/")
+SB_KEY = env("SUPABASE_SERVICE_ROLE_KEY", required=not DRY)
 
 
 def slugify(s: str) -> str:
