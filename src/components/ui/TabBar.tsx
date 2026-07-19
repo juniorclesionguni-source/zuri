@@ -13,7 +13,7 @@ export const TABS = [
 const HIDE_ON = ['/', '/welcome', '/login', '/genres', '/paywall', '/checkout', '/processing', '/success', '/wrapped', '/requests', '/stats', '/notifications']
 
 export function navHidden(pathname: string): boolean {
-  return HIDE_ON.some((p) => pathname === p) || pathname.startsWith('/reader') || pathname.startsWith('/book')
+  return HIDE_ON.some((p) => pathname === p) || pathname.startsWith('/reader') || pathname.startsWith('/book') || pathname.startsWith('/admin')
 }
 
 export function TabBar() {

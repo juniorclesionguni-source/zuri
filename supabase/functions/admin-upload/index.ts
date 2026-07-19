@@ -82,5 +82,47 @@ Deno.serve(async (req) => {
     return json({ ok: true })
   }
 
+  // ponytail: apaga só a linha em books; o ficheiro no R2 fica órfão (barato, sem custo real).
+  if (body.action === 'delete') {
+    if (!SLUG.test(String(body.bookId ?? ''))) return json({ error: 'bookId inválido' }, 400)
+    const { error } = await admin.from('books').delete().eq('id', body.bookId)
+    if (error) return json({ error: error.message }, 500)
+    return json({ ok: true })
+  }
+
+  // Painel: contadores agregados (service_role lê tudo, sem mexer em RLS).
+  if (body.action === 'stats') {
+    const nowIso = new Date().toISOString()
+    const ago30 = new Date(Date.now() - 30 * 86_400_000).toISOString()
+    const [subs, readers, pays, reqs] = await Promise.all([
+      admin.from('subscriptions').select('id', { count: 'exact', head: true }).eq('status', 'active').gt('expires_at', nowIso),
+      admin.from('profiles').select('id', { count: 'exact', head: true }),
+      admin.from('payments').select('amount').eq('status', 'success').gte('created_at', ago30),
+      admin.from('book_requests').select('id', { count: 'exact', head: true }).neq('status', 'available'),
+    ])
+    const revenue30 = (pays.data ?? []).reduce((s: number, p: any) => s + (Number(p.amount) || 0), 0)
+    return json({
+      activeSubs: subs.count ?? 0,
+      totalReaders: readers.count ?? 0,
+      revenue30,
+      pendingRequests: reqs.count ?? 0,
+    })
+  }
+
+  if (body.action === 'requests') {
+    const { data } = await admin.from('book_requests')
+      .select('id, title, author, status, vote_count, created_at')
+      .order('vote_count', { ascending: false }).limit(100)
+    return json({ requests: data ?? [] })
+  }
+
+  if (body.action === 'setRequest') {
+    const ok = ['pending', 'review', 'licensing', 'available']
+    if (!body.id || !ok.includes(body.status)) return json({ error: 'pedido/estado inválido' }, 400)
+    const { error } = await admin.from('book_requests').update({ status: body.status }).eq('id', body.id)
+    if (error) return json({ error: error.message }, 500)
+    return json({ ok: true })
+  }
+
   return json({ error: 'action inválida' }, 400)
 })

@@ -31,6 +31,25 @@ export async function saveBook(book: AdminBook) {
   await call({ action: 'save', book })
 }
 
+export interface AdminStats { activeSubs: number; totalReaders: number; revenue30: number; pendingRequests: number }
+export interface BookRequest { id: string; title: string; author: string | null; status: string; vote_count: number; created_at: string }
+
+export async function fetchStats(): Promise<AdminStats> {
+  return (await call({ action: 'stats' })) as AdminStats
+}
+
+export async function fetchRequests(): Promise<BookRequest[]> {
+  return ((await call({ action: 'requests' })) as { requests: BookRequest[] }).requests
+}
+
+export async function setRequestStatus(id: string, status: string) {
+  await call({ action: 'setRequest', id, status })
+}
+
+export async function deleteBook(bookId: string) {
+  await call({ action: 'delete', bookId })
+}
+
 // Lista de admin inclui rascunhos (policy books_admin_select).
 export async function fetchAllBooks(): Promise<AdminBook[]> {
   const { data, error } = await supabase!.from('books').select('*').order('title')
