@@ -10,7 +10,7 @@ interface Props {
 
 export function LevelUpModal({ level = 3, onClose, onShare }: Props) {
   return (
-    <div className="zuri-overlay" style={{ zIndex: 250, backdropFilter: 'blur(12px)', background: 'rgba(0,0,0,0.6)' }}>
+    <div className="zuri-overlay" style={{ zIndex: 250, backdropFilter: 'blur(12px)', background: 'rgba(0,0,0,0.6)', animation: 'zbackdrop 250ms ease-out' }}>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32 }}>
         <div style={{ width: 160, height: 160, borderRadius: 80, background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'zpop 0.6s cubic-bezier(0.34,1.56,0.64,1)', marginBottom: 28 }}>
           <span style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 80, color: '#FEF8F5', lineHeight: 1 }}>{ROMAN[level] ?? level}</span>

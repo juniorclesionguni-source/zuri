@@ -43,7 +43,7 @@ export function Paywall() {
         {PLANS.map((p) => {
           const on = p.id === plan
           return (
-            <button key={p.id} onClick={() => setPlan(p.id)} style={{ position: 'relative', textAlign: 'left', cursor: 'pointer', padding: '14px 14px', borderRadius: 14, background: on ? 'var(--accent-soft)' : 'var(--bg2)', border: on ? '1.5px solid var(--accent)' : '1.5px solid var(--border)' }}>
+            <button key={p.id} onClick={() => setPlan(p.id)} style={{ position: 'relative', textAlign: 'left', cursor: 'pointer', padding: '14px 14px', borderRadius: 14, background: on ? 'var(--accent-soft)' : 'var(--bg2)', border: on ? '1.5px solid var(--accent)' : '1.5px solid var(--border)', transition: 'background 160ms ease-out, border-color 160ms ease-out' }}>
               {p.note && <span style={{ position: 'absolute', top: -8, right: 10, fontFamily: 'var(--sans)', fontSize: 10, fontWeight: 700, color: '#fff', background: 'var(--accent)', padding: '2px 8px', borderRadius: 8 }}>{p.note}</span>}
               <div style={{ fontFamily: 'var(--sans)', fontSize: 13, color: 'var(--text2)', marginBottom: 4 }}>{p.label}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>

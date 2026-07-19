@@ -301,7 +301,7 @@ export function Reader() {
       {/* Fim da amostra grátis — perda concreta (o livro/progresso já lido) converte mais
           do que um argumento genérico de valor da app. Preço = plano mais barato, nunca fixo. */}
       {sampleEnded && (
-        <div style={{ position: 'absolute', inset: 0, zIndex: 60, background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center' }}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 60, background: bg, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center', animation: 'zfade 250ms ease-out' }}>
           <div style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontSize: 24, color: '#3A2020', maxWidth: 300, lineHeight: 1.3 }}>
             Estás a {Math.max(prog, SAMPLE_PCT)}% de "{book?.title}".
           </div>

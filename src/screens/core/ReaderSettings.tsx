@@ -22,8 +22,8 @@ const THEMES = [
 export function ReaderSettings({ theme, fontSize, lineHeight, fontFamily, onTheme, onFontSize, onLineHeight, onFontFamily, onClose }: Props) {
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 100 }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'var(--bg)', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: '16px 24px 40px', maxHeight: '72%', overflowY: 'auto' }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', animation: 'zbackdrop 200ms ease-out' }} />
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'var(--bg)', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: '16px 24px 40px', maxHeight: '72%', overflowY: 'auto', animation: 'zsheet 280ms cubic-bezier(0.32,0.72,0,1)' }}>
         <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--border)', margin: '0 auto 18px' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 22, color: 'var(--text)', margin: 0 }}>Preferências</h2>

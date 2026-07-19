@@ -11,6 +11,18 @@ import { useLibrary } from '../../store/library'
 import { useNotifications } from '../../store/notifications'
 import { useUIStore } from '../../store/ui'
 
+// Shimmer do skeleton — indica "a carregar", não "partido". Gradiente ambiente
+// (não é troca de estado discreta, por isso fica fora do orçamento de 300ms da UI).
+function skeletonShimmer(aspectRatio: string | undefined, radius: number): React.CSSProperties {
+  return {
+    aspectRatio,
+    borderRadius: radius,
+    background: 'linear-gradient(90deg, var(--bg2) 25%, var(--bg3) 50%, var(--bg2) 75%)',
+    backgroundSize: '200% 100%',
+    animation: 'zshimmer 1.4s ease-in-out infinite',
+  }
+}
+
 export function Home({ onShare }: { onShare: (kind: string) => void }) {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
@@ -108,9 +120,9 @@ export function Home({ onShare }: { onShare: (kind: string) => void }) {
           {catalogLoading && books.length === 0
             ? [0, 1, 2, 3].map((i) => (
                 <div key={i}>
-                  <div style={{ aspectRatio: '2/3', borderRadius: 10, background: 'var(--bg2)' }} />
-                  <div style={{ height: 12, width: '80%', borderRadius: 4, background: 'var(--bg2)', marginTop: 10 }} />
-                  <div style={{ height: 10, width: '55%', borderRadius: 4, background: 'var(--bg2)', marginTop: 6 }} />
+                  <div style={skeletonShimmer('2/3', 10)} />
+                  <div style={{ ...skeletonShimmer(undefined, 4), height: 12, width: '80%', marginTop: 10 }} />
+                  <div style={{ ...skeletonShimmer(undefined, 4), height: 10, width: '55%', marginTop: 6 }} />
                 </div>
               ))
             : books.slice(1, 5).map((b) => (
