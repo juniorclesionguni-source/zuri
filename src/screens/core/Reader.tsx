@@ -151,11 +151,15 @@ export function Reader() {
           doc.addEventListener('click', (e: MouseEvent) => {
             if (swiped) { swiped = false; return } // ignora o click que segue um swipe
             if (!scrolled) {
-              // Zonas de toque relativas à largura da página (iframe = largura do container).
-              const w = doc.documentElement.clientWidth || 1
-              const x = e.clientX
-              if (x < w * 0.36) { renditionInstance.prev(); return }
-              if (x > w * 0.64) { renditionInstance.next(); return }
+              // No modo paginado o epubjs alinha TODAS as colunas do capítulo lado a lado
+              // (documentElement.clientWidth = livro inteiro). A largura da PÁGINA visível é
+              // a do próprio iframe; normaliza-se a posição por página (módulo) para saber
+              // se o toque caiu na metade esquerda/direita da página atual.
+              const view: any = doc.defaultView
+              const pageW = (view?.frameElement?.clientWidth as number) || doc.documentElement.clientWidth || 1
+              const x = ((e.clientX % pageW) + pageW) % pageW
+              if (x < pageW * 0.36) { renditionInstance.prev(); return }
+              if (x > pageW * 0.64) { renditionInstance.next(); return }
             }
             setChromeVisible((v) => !v)            // faixa central / modo scroll: alterna a barra
           })
