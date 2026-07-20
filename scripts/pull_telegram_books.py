@@ -33,6 +33,14 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
+# Saída em UTF-8 — no Windows o default é cp1252, que rebenta ao imprimir →, —, ⚠
+# (sobretudo quando a saída é redirecionada para um ficheiro/log).
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 DRY = "--dry-run" in sys.argv
 ALL = "--all" in sys.argv  # ignora a curadoria e importa tudo
 
