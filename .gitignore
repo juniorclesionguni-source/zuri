@@ -31,3 +31,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# skills instaladas (reproduziveis via npx skills add) e ficheiros locais
+.agents/
+.claude/skills/
+skills-lock.json
+scripts/__pycache__/
+zuri_tg.session
+zuri_tg.session-journal
+import.log
