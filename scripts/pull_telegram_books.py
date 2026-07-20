@@ -37,23 +37,28 @@ DRY = "--dry-run" in sys.argv
 ALL = "--all" in sys.argv  # ignora a curadoria e importa tudo
 
 
-def load_curated() -> set[str]:
-    """Slugs a importar (scripts/curated_books.txt). Vazio = importar tudo."""
+def load_curated() -> dict[str, str]:
+    """{slug: género} a importar (scripts/curated_books.txt). Vazio = importar tudo.
+    Formato de cada linha: 'slug = Género   # comentário'."""
     if ALL:
-        return set()
+        return {}
     f = Path(__file__).resolve().parent / "curated_books.txt"
     if not f.exists():
-        return set()
-    slugs = set()
+        return {}
+    out: dict[str, str] = {}
     for line in f.read_text(encoding="utf-8").splitlines():
         line = line.strip()
-        if line and not line.startswith("#"):
-            slugs.add(re.split(r"\s+#|\s+", line, maxsplit=1)[0])
-    return slugs
+        if not line or line.startswith("#"):
+            continue
+        left = re.split(r"\s+#", line, maxsplit=1)[0]  # tira comentário inline
+        slug, _, genre = left.partition("=")
+        out[slug.strip()] = genre.strip() or "Ficção"
+    return out
 
 
 CURATED = load_curated()
 
+import html
 import zipfile
 import posixpath
 import xml.etree.ElementTree as ET
@@ -138,7 +143,7 @@ def _local(tag: str) -> str:
 
 
 def read_metadata(path: Path):
-    """(title, author, cover_bytes, cover_ext, words) lendo o EPUB como zip.
+    """(title, author, cover_bytes, cover_ext, words, excerpt) lendo o EPUB como zip.
     Não usa ebooklib de propósito — ele estoira em livros que referenciam fontes
     ausentes. Aqui, uma capa/spine em falta é ignorada, não fatal."""
     with zipfile.ZipFile(path) as z:  # BadZipFile aqui → apanhado no loop, salta
@@ -183,8 +188,10 @@ def read_metadata(path: Path):
                 cover_bytes = z.read(key)
                 cover_ext = cover_href.rsplit(".", 1)[-1].lower()
 
-        # 3) contagem de palavras pelo spine (ficheiros em falta: ignorados)
-        words = 0
+        # 3) contagem de palavras + citação. Recolhe todos os parágrafos de prosa e
+        #    escolhe um a ~1/3 do livro — aí é texto real da história, não front matter
+        #    (capa, ficha catalográfica, dedicatória, prefácio ficam no início).
+        words, paras = 0, []
         for idref in spine:
             item = manifest.get(idref)
             if not item:
@@ -192,10 +199,19 @@ def read_metadata(path: Path):
             key = resolve(item[0])
             if key not in names:
                 continue
-            text = re.sub(r"<[^>]+>", " ", z.read(key).decode("utf-8", "ignore"))
-            words += len(text.split())
+            doc = z.read(key).decode("utf-8", "ignore")
+            words += len(re.sub(r"<[^>]+>", " ", doc).split())
+            for m in re.findall(r"<p[^>]*>(.*?)</p>", doc, re.S | re.I):
+                p = html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", m)).strip())
+                if 120 <= len(p) <= 400:
+                    paras.append(p)
 
-    return title, author, cover_bytes, cover_ext, words
+        excerpt = None
+        if paras:
+            p = paras[len(paras) // 3]
+            excerpt = p if len(p) <= 300 else p[:297].rsplit(" ", 1)[0] + "…"
+
+    return title, author, cover_bytes, cover_ext, words, excerpt
 
 
 def book_exists(book_id: str) -> bool:
@@ -261,7 +277,7 @@ async def main():
                 print(f"↓ {name}")
                 await msg.download_media(file=str(dest))
 
-            title, author, cover, cover_ext, words = read_metadata(dest)
+            title, author, cover, cover_ext, words, excerpt = read_metadata(dest)
             book_id = slugify(title)
             # Sem título real (hash, UUID, ou caminho de ficheiro) → não vale importar.
             junk = re.fullmatch(r"[0-9a-f]{16,}", book_id) or re.fullmatch(
@@ -291,10 +307,11 @@ async def main():
                               Body=cover, ContentType=f"image/{'png' if cover_ext == 'png' else 'jpeg'}")
             insert_book({
                 "id": book_id, "title": title, "author": author,
-                "genre": "Ficção",  # placeholder — coluna é NOT NULL; re-classificas ao publicar
+                "genre": CURATED.get(book_id) or "Ficção",  # género certo da curadoria
+                "excerpt": excerpt,                          # citação extraída do livro
                 "epub_path": epub_key, "cover_path": cover_key,
                 "pages": round(words / 300) or None, "mins": round(words / 200) or None,
-                "is_published": False,  # revê no /admin (género, capa) e publica
+                "is_published": True,  # curados entram já publicados (género/capa/citação prontos)
             })
             imported += 1
         except Exception as e:
@@ -307,7 +324,7 @@ async def main():
     extra = f", {off} fora da curadoria" if CURATED else ""
     print(f"\nPronto: {imported} {verb}, {skipped} já existiam, {bad} maus{extra}.")
     if imported and not DRY:
-        print("Vai ao /admin → Catálogo: define o género e publica cada um.")
+        print("Publicados com género/capa/citação. Revê no /admin se quiseres afinar.")
 
 
 if __name__ == "__main__":
