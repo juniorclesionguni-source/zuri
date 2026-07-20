@@ -30,6 +30,7 @@ import json
 import asyncio
 import unicodedata
 import urllib.request
+import urllib.error
 from pathlib import Path
 
 DRY = "--dry-run" in sys.argv
@@ -219,7 +220,10 @@ def insert_book(row: dict):
             "Prefer": "resolution=ignore-duplicates,return=minimal",
         },
     )
-    urllib.request.urlopen(req).close()
+    try:
+        urllib.request.urlopen(req).close()
+    except urllib.error.HTTPError as e:  # surface o corpo (ex. constraint) em vez de "400"
+        raise RuntimeError(f"Supabase {e.code}: {e.read().decode('utf-8', 'ignore')[:200]}") from None
 
 
 def r2():
@@ -287,6 +291,7 @@ async def main():
                               Body=cover, ContentType=f"image/{'png' if cover_ext == 'png' else 'jpeg'}")
             insert_book({
                 "id": book_id, "title": title, "author": author,
+                "genre": "Ficção",  # placeholder — coluna é NOT NULL; re-classificas ao publicar
                 "epub_path": epub_key, "cover_path": cover_key,
                 "pages": round(words / 300) or None, "mins": round(words / 200) or None,
                 "is_published": False,  # revê no /admin (género, capa) e publica
