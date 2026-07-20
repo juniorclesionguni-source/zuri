@@ -6,6 +6,7 @@ import { ReaderSettings } from './ReaderSettings'
 import { useCatalog } from '../../store/catalog'
 import { useLibrary } from '../../store/library'
 import { useAuthStore } from '../../store/auth'
+import { useReaderPrefs } from '../../store/reader'
 import { saveProgress, getProgress, logSession, getOfflineBook } from '../../data/db'
 import { progress as progressApi, content as contentApi } from '../../data/services'
 import { PLANS } from '../../data/plans'
@@ -36,6 +37,7 @@ export function Reader() {
   const startedAtRef = useRef(0)   // timestamp de início da sessão
   const sampleRef = useRef(false)  // amostra grátis: limitada ao 1º item do spine
   const prevPctRef = useRef(0)     // pct anterior (para detectar cruzamento 95%)
+  const cfiRef = useRef<string | undefined>(undefined) // posição atual (para re-init ao trocar de modo)
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -44,11 +46,22 @@ export function Reader() {
   const [showSettings, setShowSettings] = useState(false)
   const [sampleEnded, setSampleEnded] = useState(false)
 
-  // reader settings
-  const [theme, setTheme] = useState('sépia')
-  const [fontSize, setFontSize] = useState(17)
-  const [lineHeight, setLineHeight] = useState('Normal')
-  const [fontFamily, setFontFamily] = useState('Lora')
+  // reader settings — persistidos entre sessões (store/reader)
+  const theme = useReaderPrefs((s) => s.theme)
+  const fontSize = useReaderPrefs((s) => s.fontSize)
+  const lineHeight = useReaderPrefs((s) => s.lineHeight)
+  const fontFamily = useReaderPrefs((s) => s.fontFamily)
+  const flow = useReaderPrefs((s) => s.flow)
+  const hintSeen = useReaderPrefs((s) => s.hintSeen)
+  const setTheme = useReaderPrefs((s) => s.setTheme)
+  const setFontSize = useReaderPrefs((s) => s.setFontSize)
+  const setLineHeight = useReaderPrefs((s) => s.setLineHeight)
+  const setFontFamily = useReaderPrefs((s) => s.setFontFamily)
+  const setFlow = useReaderPrefs((s) => s.setFlow)
+  const setHintSeen = useReaderPrefs((s) => s.setHintSeen)
+
+  // Dica de navegação na 1ª abertura de sempre (só no modo paginado).
+  const [showHint, setShowHint] = useState(false)
 
   const applyTheme = useCallback((r: any, t: string, fs: number, lh: string, ff: string) => {
     const { bg, text } = THEMES[t] ?? THEMES['sépia']
@@ -105,17 +118,22 @@ export function Reader() {
         epubInstance = ePub(source)
         epubRef.current = epubInstance
 
+        const scrolled = flow === 'scrolled'
         renditionInstance = epubInstance.renderTo(containerRef.current!, {
           width: '100%',
           height: '100%',
-          flow: 'paginated',
+          // 'scrolled-doc' = scroll vertical contínuo dentro do capítulo (o epubjs
+          // encadeia capítulos à medida que se rola). 'paginated' = uma página (Kindle).
+          flow: scrolled ? 'scrolled-doc' : 'paginated',
           spread: 'none',          // uma página de cada vez (Kindle)
           minSpreadWidth: 100000,  // nunca mostrar 2 páginas lado a lado
         })
         renditionRef.current = renditionInstance
 
-        // Tudo DENTRO do iframe (cliques do epubjs não sobem para o React):
-        // SÓ o swipe vira a página; qualquer toque mostra/esconde a barra.
+        // Tudo DENTRO do iframe (cliques do epubjs não sobem para o React).
+        // Paginado: metade esquerda = página anterior, metade direita = seguinte,
+        //   faixa central (~28%) = mostra/esconde a barra. Swipe horizontal também vira.
+        // Scroll: o dedo rola; qualquer toque só alterna a barra.
         renditionInstance.hooks.content.register((contents: any) => {
           const doc = contents.document
           let x0 = 0, y0 = 0, swiped = false
@@ -125,29 +143,41 @@ export function Reader() {
           doc.addEventListener('touchend', (e: TouchEvent) => {
             const dx = e.changedTouches[0].clientX - x0
             const dy = e.changedTouches[0].clientY - y0
-            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+            if (!scrolled && Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
               swiped = true
               if (dx < 0) renditionInstance.next(); else renditionInstance.prev()
             }
           }, { passive: true })
-          doc.addEventListener('click', () => {
+          doc.addEventListener('click', (e: MouseEvent) => {
             if (swiped) { swiped = false; return } // ignora o click que segue um swipe
-            setChromeVisible((v) => !v)            // qualquer toque alterna a barra
+            if (!scrolled) {
+              // Zonas de toque relativas à largura da página (iframe = largura do container).
+              const w = doc.documentElement.clientWidth || 1
+              const x = e.clientX
+              if (x < w * 0.36) { renditionInstance.prev(); return }
+              if (x > w * 0.64) { renditionInstance.next(); return }
+            }
+            setChromeVisible((v) => !v)            // faixa central / modo scroll: alterna a barra
           })
         })
 
         applyTheme(renditionInstance, theme, fontSize, lineHeight, fontFamily)
 
-        // A1.6: retoma na posição guardada (Dexie)
+        // A1.6: retoma na posição guardada (Dexie). Ao trocar de modo (páginas↔scroll)
+        // o cfiRef tem a posição mais fresca que o que está gravado.
         const saved = user?.id && id ? await getProgress(user.id, id) : null
         prevPctRef.current = saved?.progressPct ?? 0
-        await renditionInstance.display(saved?.lastCfi || undefined)
+        await renditionInstance.display(cfiRef.current || saved?.lastCfi || undefined)
         if (destroyed) return
         setLoading(false)
+
+        // Dica de navegação na 1ª abertura de sempre (só faz sentido no modo paginado).
+        if (!hintSeen && !scrolled) setShowHint(true)
 
         let turns = 0
         renditionInstance.on('relocated', (loc: any) => {
           turns++
+          cfiRef.current = loc.start.cfi
           const hasLoc = !!epubInstance.locations?.total
           let pct = hasLoc ? Math.round(epubInstance.locations.percentageFromCfi(loc.start.cfi) * 100) : 0
           // A partir da 3ª página conta como "a ler", mesmo que a % ainda arredonde a 0.
@@ -184,7 +214,7 @@ export function Reader() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [book?.epub_path, loaded])
+  }, [book?.epub_path, loaded, flow])
 
   // sync theme/size changes to rendition
   useEffect(() => {
@@ -298,6 +328,26 @@ export function Reader() {
 
       {/* Navegação por toque/tecla é feita dentro do iframe (hooks.content) — ver efeito acima. */}
 
+      {/* Dica de navegação (1ª abertura, modo paginado). Mostra as zonas de toque. */}
+      {showHint && (
+        <div
+          onClick={(e) => { e.stopPropagation(); setShowHint(false); setHintSeen() }}
+          style={{ position: 'absolute', inset: 0, zIndex: 55, display: 'flex', animation: 'zfade 250ms ease-out' }}
+        >
+          <div style={{ flex: 36, background: 'rgba(58,32,32,0.55)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#FEF8F5' }}>
+            <Icon name="chevron-left" size={30} color="#FEF8F5" strokeWidth={2.4} />
+            <span style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 600 }}>Anterior</span>
+          </div>
+          <div style={{ flex: 28, background: 'rgba(58,32,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 8px' }}>
+            <span style={{ fontFamily: 'var(--sans)', fontSize: 11, fontWeight: 600, color: '#FEF8F5', textAlign: 'center', opacity: 0.9 }}>Toca ao centro para o menu</span>
+          </div>
+          <div style={{ flex: 36, background: 'rgba(201,106,88,0.72)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#FEF8F5' }}>
+            <Icon name="chevron-right" size={30} color="#FEF8F5" strokeWidth={2.4} />
+            <span style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 600 }}>Seguinte</span>
+          </div>
+        </div>
+      )}
+
       {/* Fim da amostra grátis — perda concreta (o livro/progresso já lido) converte mais
           do que um argumento genérico de valor da app. Preço = plano mais barato, nunca fixo. */}
       {sampleEnded && (
@@ -317,8 +367,8 @@ export function Reader() {
 
       {showSettings && (
         <ReaderSettings
-          theme={theme} fontSize={fontSize} lineHeight={lineHeight} fontFamily={fontFamily}
-          onTheme={setTheme} onFontSize={setFontSize} onLineHeight={setLineHeight} onFontFamily={setFontFamily}
+          theme={theme} fontSize={fontSize} lineHeight={lineHeight} fontFamily={fontFamily} flow={flow}
+          onTheme={setTheme} onFontSize={setFontSize} onLineHeight={setLineHeight} onFontFamily={setFontFamily} onFlow={setFlow}
           onClose={() => setShowSettings(false)}
         />
       )}

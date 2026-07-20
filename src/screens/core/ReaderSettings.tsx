@@ -1,14 +1,17 @@
 import { Icon } from '../../components/ui/Icon'
+import type { Flow } from '../../store/reader'
 
 interface Props {
   theme: string
   fontSize: number
   lineHeight: string
   fontFamily: string
+  flow: Flow
   onTheme: (t: string) => void
   onFontSize: (s: number) => void
   onLineHeight: (lh: string) => void
   onFontFamily: (f: string) => void
+  onFlow: (f: Flow) => void
   onClose: () => void
 }
 
@@ -19,7 +22,7 @@ const THEMES = [
   { id: 'oled',   bg: '#000',    text: '#E0D5C0' },
 ]
 
-export function ReaderSettings({ theme, fontSize, lineHeight, fontFamily, onTheme, onFontSize, onLineHeight, onFontFamily, onClose }: Props) {
+export function ReaderSettings({ theme, fontSize, lineHeight, fontFamily, flow, onTheme, onFontSize, onLineHeight, onFontFamily, onFlow, onClose }: Props) {
   return (
     <div style={{ position: 'absolute', inset: 0, zIndex: 100 }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', animation: 'zbackdrop 200ms ease-out' }} />
@@ -28,6 +31,19 @@ export function ReaderSettings({ theme, fontSize, lineHeight, fontFamily, onThem
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h2 style={{ fontFamily: 'var(--serif)', fontStyle: 'italic', fontWeight: 500, fontSize: 22, color: 'var(--text)', margin: 0 }}>Preferências</h2>
           <div onClick={onClose} style={{ cursor: 'pointer' }}><Icon name="x" size={22} color="var(--text3)" strokeWidth={1.8} /></div>
+        </div>
+
+        <div style={{ fontFamily: 'var(--sans)', fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', color: 'var(--text3)', textTransform: 'uppercase', marginBottom: 12 }}>Modo de leitura</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
+          {([
+            { id: 'paginated' as const, label: 'Páginas', hint: 'Toca ou desliza' },
+            { id: 'scrolled' as const, label: 'Scroll', hint: 'Rola para baixo' },
+          ]).map((o) => (
+            <button key={o.id} onClick={() => onFlow(o.id)} style={{ flex: 1, padding: '12px 0', borderRadius: 12, border: `1.5px solid ${flow === o.id ? 'var(--accent)' : 'var(--border)'}`, background: flow === o.id ? 'var(--accent-soft)' : 'transparent', cursor: 'pointer' }}>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 700, color: flow === o.id ? 'var(--accent)' : 'var(--text)' }}>{o.label}</div>
+              <div style={{ fontFamily: 'var(--sans)', fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>{o.hint}</div>
+            </button>
+          ))}
         </div>
 
         <div style={{ fontFamily: 'var(--sans)', fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', color: 'var(--text3)', textTransform: 'uppercase', marginBottom: 12 }}>Tipo de letra</div>
