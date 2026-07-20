@@ -68,3 +68,59 @@ tdah-como-lidar                         # TDAH: Como Lidar — Jessica McCabe
 inteligente-mas-disperso                # Inteligente mas Disperso — Dawson & Guare
 a-musica-no-seu-cerebro-nova-edicao     # A Música no Seu Cérebro — Daniel Levitin
 inteligencia-social-a-ciencia-revolucionaria-das-relacoes-humana   # Inteligência Social — Daniel Goleman
+
+# ===== Expansão para 100 =====
+
+# --- Romance / BookTok (mais) ---
+secretamente-sua                        # Secretamente Sua — Tessa Bailey
+a-noiva-errada                          # A Noiva Errada — Catharina Maura
+ate-o-fim-do-verao                      # Até o Fim do Verão — Abby Jimenez
+para-sempre-seu                         # Para Sempre Seu — Abby Jimenez
+namorando-com-um-vampiro                # Namorando com um Vampiro — Jenna Levine
+mil-vezes-amor                          # Mil Vezes Amor — Lynn Painter
+minha-melhor-parte                      # Minha Melhor Parte — Hannah Bonam-Young
+as-regras-do-jogo                       # As Regras do Jogo — Sarah Adams
+de-mil-maneiras-diferentes              # De Mil Maneiras Diferentes — Cecelia Ahern
+box-colleen-hoover                      # Box Colleen Hoover — Colleen Hoover
+as-duas-vidas-de-lydia-bird             # As Duas Vidas de Lydia Bird — Josie Silver
+amor-entre-livros                       # Amor Entre Livros — Jasmine Guillory
+
+# --- Fantasia / Romantasy (mais) ---
+a-sociedade-supersecreta-de-bruxas-rebeldes   # A Sociedade Supersecreta de Bruxas Rebeldes — Sangu Mandanna
+o-veu-escarlate                         # O Véu Escarlate — Shelby Mahurin
+phantasma                               # Phantasma — Kaylie Smith
+as-cinzas-e-o-rei-maldito-pelas-estrelas      # As Cinzas e o Rei Maldito — Carissa Broadbent
+o-rei-de-foxglove                       # O Rei de Foxglove — Hannah Whitten
+diarios-do-vampiro-box                  # Diários do Vampiro (box) — L. J. Smith
+colecao-as-cronicas-vampirescas         # As Crônicas Vampirescas — Anne Rice
+estrelas-nas-sombras                    # Estrelas nas Sombras — Marie Lu
+
+# --- Thriller / Suspense (mais) ---
+a-primeira-mentira                      # A Primeira Mentira (First Lie Wins) — Ashley Elston
+como-desvendar-seu-proprio-assassinato  # Como Desvendar Seu Próprio Assassinato — Kristen Perrin
+eu-vou-te-encontrar                     # Eu Vou Te Encontrar — Harlan Coben
+a-trama                                 # A Trama (The Plot) — Jean Hanff Korelitz
+um-por-um                               # Um por Um — Ruth Ware
+a-casa-das-lembrancas-perdidas          # A Casa das Lembranças Perdidas — Kate Morton
+a-mentirosa                             # A Mentirosa — Claire Douglas
+o-quarto-em-chamas                      # O Quarto em Chamas — Michael Connelly
+a-cabana-na-floresta                    # A Cabana na Floresta — Ana Reyes
+terapia                                 # Terapia — Sebastian Fitzek
+a-villa                                 # A Villa — Rachel Hawkins
+o-que-fazemos-nas-sombras               # O Que Fazemos nas Sombras — Jennifer Hillier
+bem-vindos-ao-retiro                    # Bem-vindos ao Retiro — C. J. Tudor
+a-espia                                 # A Espiã — Tess Gerritsen
+
+# --- Ficção / Literário (mais) ---
+o-mundo-depois-de-nos                   # O Mundo Depois de Nós — Rumaan Alam
+tres                                    # Três — Valérie Perrin
+o-jogo-dos-desejos                      # O Jogo dos Desejos — Meg Shaffer
+os-radley                               # Os Radley — Matt Haig
+para-sempre                             # Para Sempre... — Judy Blume
+
+# --- Não-ficção (mais) ---
+felicidade-autentica                    # Felicidade Autêntica — Martin Seligman
+como-o-mundo-funciona-um-guia-cientifico-para-o-passado-o-presen   # Como o Mundo Funciona — Vaclav Smil
+a-jornada-da-humanidade-as-origens-da-riqueza-e-da-desigualdade    # A Jornada da Humanidade — Oded Galor
+desinformacao                           # Desinformação — Dan Ariely
+a-cura-do-burnout                       # A Cura do Burnout — Emily Ballesteros
