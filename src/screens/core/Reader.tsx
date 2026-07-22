@@ -158,8 +158,8 @@ export function Reader() {
               const view: any = doc.defaultView
               const pageW = (view?.frameElement?.clientWidth as number) || doc.documentElement.clientWidth || 1
               const x = ((e.clientX % pageW) + pageW) % pageW
-              if (x < pageW * 0.36) { renditionInstance.prev(); return }
-              if (x > pageW * 0.64) { renditionInstance.next(); return }
+              if (x < pageW * 0.40) { renditionInstance.prev(); return }
+              if (x > pageW * 0.60) { renditionInstance.next(); return }
             }
             setChromeVisible((v) => !v)            // faixa central / modo scroll: alterna a barra
           })
@@ -338,14 +338,14 @@ export function Reader() {
           onClick={(e) => { e.stopPropagation(); setShowHint(false); setHintSeen() }}
           style={{ position: 'absolute', inset: 0, zIndex: 55, display: 'flex', animation: 'zfade 250ms ease-out' }}
         >
-          <div style={{ flex: 36, background: 'rgba(58,32,32,0.55)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#FEF8F5' }}>
+          <div style={{ flex: 40, background: 'rgba(58,32,32,0.55)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#FEF8F5' }}>
             <Icon name="chevron-left" size={30} color="#FEF8F5" strokeWidth={2.4} />
             <span style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 600 }}>Anterior</span>
           </div>
-          <div style={{ flex: 28, background: 'rgba(58,32,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 8px' }}>
+          <div style={{ flex: 20, background: 'rgba(58,32,32,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 8px' }}>
             <span style={{ fontFamily: 'var(--sans)', fontSize: 11, fontWeight: 600, color: '#FEF8F5', textAlign: 'center', opacity: 0.9 }}>Toca ao centro para o menu</span>
           </div>
-          <div style={{ flex: 36, background: 'rgba(201,106,88,0.72)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#FEF8F5' }}>
+          <div style={{ flex: 40, background: 'rgba(201,106,88,0.72)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#FEF8F5' }}>
             <Icon name="chevron-right" size={30} color="#FEF8F5" strokeWidth={2.4} />
             <span style={{ fontFamily: 'var(--sans)', fontSize: 12, fontWeight: 600 }}>Seguinte</span>
           </div>
